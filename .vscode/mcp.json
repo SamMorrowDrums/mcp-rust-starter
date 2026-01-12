@@ -1,0 +1,21 @@
+{
+  "servers": {
+    // Development: Uses 'cargo run' for quick iteration
+    "mcp-rust-starter": {
+      "type": "stdio",
+      "command": "cargo",
+      "args": ["run", "--bin", "mcp-rust-starter-stdio"]
+    }
+    // For live reload, install cargo-watch: cargo install cargo-watch
+    // Run in terminal: cargo watch -x 'run --bin mcp-rust-starter-stdio'
+    
+    // Production: Build first with 'cargo build --release', then use:
+    // "command": "./target/release/mcp-rust-starter-stdio"
+    
+    // HTTP transport: Run server in terminal, then:
+    // "mcp-rust-starter-http": {
+    //   "type": "http",
+    //   "url": "http://localhost:3000/mcp"
+    // }
+  }
+}

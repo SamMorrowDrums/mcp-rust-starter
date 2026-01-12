@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug (stdio)",
+      "cargo": {
+        "args": ["build", "--bin=mcp-rust-starter-stdio", "--package=mcp-rust-starter"]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug (HTTP)",
+      "cargo": {
+        "args": ["build", "--bin=mcp-rust-starter-http", "--package=mcp-rust-starter"]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PORT": "3000"
+      }
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Run Tests",
+      "cargo": {
+        "args": ["test", "--no-run", "--package=mcp-rust-starter"]
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
