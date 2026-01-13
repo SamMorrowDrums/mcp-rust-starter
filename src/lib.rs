@@ -221,6 +221,27 @@ impl ServerHandler for McpServer {
         }
     }
 
+    async fn list_tools(
+        &self,
+        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<rmcp::model::ListToolsResult, McpError> {
+        Ok(rmcp::model::ListToolsResult {
+            tools: self.tool_router.list_all(),
+            next_cursor: None,
+            meta: None,
+        })
+    }
+
+    async fn call_tool(
+        &self,
+        request: rmcp::model::CallToolRequestParam,
+        context: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, McpError> {
+        let tool_context = rmcp::handler::server::tool::ToolCallContext::new(self, request, context);
+        self.tool_router.call(tool_context).await
+    }
+
     async fn list_resources(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParam>,
