@@ -149,15 +149,7 @@ The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) is an 
 ### Running Inspector
 
 ```bash
-# Build the binary first
-cargo build
-
-# Run inspector with the stdio binary
-npx @modelcontextprotocol/inspector ./target/debug/mcp-rust-starter-stdio
-
-# Or for release builds
-cargo build --release
-npx @modelcontextprotocol/inspector ./target/release/mcp-rust-starter-stdio
+npx @modelcontextprotocol/inspector -- cargo run --bin mcp-rust-starter-stdio
 ```
 
 ### What Inspector Provides
