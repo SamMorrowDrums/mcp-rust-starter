@@ -14,6 +14,7 @@
 //! - [MCP Specification](https://modelcontextprotocol.io/)
 //! - [rmcp SDK](https://docs.rs/rmcp)
 
+pub mod icons;
 pub mod prompts;
 pub mod resources;
 pub mod tools;
@@ -110,7 +111,8 @@ impl McpServer {
             read_only_hint = true,
             idempotent_hint = true,
             open_world_hint = false
-        )
+        ),
+        icons = icons::waving_hand()
     )]
     async fn hello(&self) -> Result<CallToolResult, McpError> {
         let message = "Hello! Welcome to the MCP Rust Starter Server.";
@@ -126,7 +128,8 @@ impl McpServer {
             read_only_hint = true,
             idempotent_hint = false,
             open_world_hint = false
-        )
+        ),
+        icons = icons::sun_behind_cloud()
     )]
     async fn get_weather(&self) -> Result<CallToolResult, McpError> {
         use rand::Rng;
@@ -157,7 +160,8 @@ impl McpServer {
             read_only_hint = true,
             idempotent_hint = true,
             open_world_hint = false
-        )
+        ),
+        icons = icons::robot()
     )]
     async fn server_status(&self) -> Result<CallToolResult, McpError> {
         let status = serde_json::json!({
@@ -182,7 +186,8 @@ impl McpServer {
             read_only_hint = true,
             idempotent_hint = true,
             open_world_hint = false
-        )
+        ),
+        icons = icons::abacus()
     )]
     async fn calculator(&self) -> Result<CallToolResult, McpError> {
         // Note: rmcp 0.11 has limited support for parameterized tools
