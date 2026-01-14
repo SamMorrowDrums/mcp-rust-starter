@@ -97,7 +97,7 @@ fn greet_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpEr
         McpError::invalid_params("Missing required 'name' argument".to_string(), None)
     })?;
 
-    let style = args.get("style").map(String::as_str).unwrap_or("casual");
+    let style = args.get("style").map_or("casual", String::as_str);
 
     let text = match style {
         "formal" => format!("Please compose a formal, professional greeting for {name}."),
@@ -124,7 +124,7 @@ fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult,
         McpError::invalid_params("Missing required 'language' argument".to_string(), None)
     })?;
 
-    let focus = args.get("focus").map(String::as_str).unwrap_or("all");
+    let focus = args.get("focus").map_or("all", String::as_str);
 
     let focus_instruction = match focus {
         "security" => "Focus on security vulnerabilities and potential exploits.",

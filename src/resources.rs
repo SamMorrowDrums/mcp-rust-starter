@@ -67,7 +67,7 @@ pub async fn read_resource(uri: &str) -> Result<ReadResourceResult, McpError> {
 }
 
 fn about_content() -> String {
-    r#"MCP Rust Starter v1.0.0
+    r"MCP Rust Starter v1.0.0
 
 This is a feature-complete MCP server demonstrating:
 - Tools with structured input/output and annotations
@@ -76,7 +76,7 @@ This is a feature-complete MCP server demonstrating:
 
 Built with rmcp - the official Rust MCP SDK.
 
-For more information, visit: https://modelcontextprotocol.io"#
+For more information, visit: https://modelcontextprotocol.io"
         .to_string()
 }
 

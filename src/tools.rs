@@ -14,7 +14,7 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Weather data returned by the get_weather tool.
+/// Weather data returned by the `get_weather` tool.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Weather {
     pub location: String,
@@ -41,10 +41,10 @@ pub enum Operation {
 impl std::fmt::Display for Operation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Operation::Add => write!(f, "add"),
-            Operation::Subtract => write!(f, "subtract"),
-            Operation::Multiply => write!(f, "multiply"),
-            Operation::Divide => write!(f, "divide"),
+            Self::Add => write!(f, "add"),
+            Self::Subtract => write!(f, "subtract"),
+            Self::Multiply => write!(f, "multiply"),
+            Self::Divide => write!(f, "divide"),
         }
     }
 }

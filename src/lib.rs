@@ -36,7 +36,7 @@ use rmcp::{
 pub use tools::{Weather, Operation};
 
 /// Server instructions for AI assistants.
-pub const SERVER_INSTRUCTIONS: &str = r#"# MCP Rust Starter Server
+pub const SERVER_INSTRUCTIONS: &str = r"# MCP Rust Starter Server
 
 A demonstration MCP server showcasing Rust SDK capabilities.
 
@@ -73,7 +73,7 @@ All tools include annotations indicating:
 - idempotent_hint: If they're safe to retry
 - open_world_hint: Whether they access external systems
 
-Use these hints to make informed decisions about tool usage."#;
+Use these hints to make informed decisions about tool usage.";
 
 /// The main MCP server implementing all handlers.
 #[derive(Clone)]
@@ -196,6 +196,69 @@ impl McpServer {
             "hint": "This calculator accepts a, b (numbers) and operation (add/subtract/multiply/divide)",
             "example": "10 + 5 = 15",
             "supported_operations": ["add", "subtract", "multiply", "divide"]
+        });
+
+        let json_str = serde_json::to_string_pretty(&result)
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+
+        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+    }
+
+    // Note: Elicitation tools would require access to the RequestContext
+    // which is not available in the tool_router macro. These are placeholder
+    // implementations showing the pattern. Full elicitation requires custom
+    // call_tool implementation.
+
+    /// Request user confirmation before proceeding with an action.
+    /// Demonstrates elicitation capability for user interaction.
+    #[tool(
+        name = "confirm_action",
+        description = "Request user confirmation. Uses MCP elicitation to get user approval before proceeding with an action.",
+        annotations(
+            title = "Confirm Action",
+            read_only_hint = true,
+            idempotent_hint = true,
+            open_world_hint = false
+        ),
+        icons = icons::question()
+    )]
+    async fn confirm_action(&self) -> Result<CallToolResult, McpError> {
+        // In a full implementation, this would use:
+        // let result = context.peer().elicit::<ConfirmSchema>("Confirm action?").await;
+        let result = serde_json::json!({
+            "note": "This tool demonstrates MCP elicitation capability.",
+            "description": "In a full implementation, this would request user confirmation via the MCP elicitation protocol.",
+            "usage": "Call with an 'action' parameter describing what needs confirmation.",
+            "elicitation_support": "Requires rmcp 'elicitation' feature and client support."
+        });
+
+        let json_str = serde_json::to_string_pretty(&result)
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+
+        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+    }
+
+    /// Collect feedback from the user.
+    /// Demonstrates elicitation with text input schema.
+    #[tool(
+        name = "get_feedback",
+        description = "Collect user feedback. Uses MCP elicitation to gather text input from the user.",
+        annotations(
+            title = "Get Feedback",
+            read_only_hint = true,
+            idempotent_hint = true,
+            open_world_hint = false
+        ),
+        icons = icons::speech()
+    )]
+    async fn get_feedback(&self) -> Result<CallToolResult, McpError> {
+        // In a full implementation, this would use:
+        // let feedback = context.peer().elicit::<FeedbackSchema>("Please provide feedback").await;
+        let result = serde_json::json!({
+            "note": "This tool demonstrates MCP elicitation capability for text input.",
+            "description": "In a full implementation, this would request feedback via the MCP elicitation protocol.",
+            "usage": "Call with a 'prompt' parameter describing what feedback is needed.",
+            "elicitation_support": "Requires rmcp 'elicitation' feature and client support."
         });
 
         let json_str = serde_json::to_string_pretty(&result)
