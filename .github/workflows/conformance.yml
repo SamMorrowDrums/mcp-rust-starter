@@ -16,6 +16,19 @@ jobs:
     with:
       install_command: "cargo fetch"
       build_command: "cargo build --release"
-      start_command: "./target/release/mcp-rust-starter-stdio"
       setup_rust: true
       rust_toolchain: "stable"
+      configurations: |
+        [
+          {
+            "name": "stdio",
+            "transport": "stdio",
+            "start_command": "./target/release/mcp-rust-starter-stdio"
+          },
+          {
+            "name": "http",
+            "transport": "http",
+            "start_command": "./target/release/mcp-rust-starter-http",
+            "server_url": "http://localhost:3000/mcp"
+          }
+        ]
