@@ -6,11 +6,11 @@
 use std::collections::HashMap;
 
 use rmcp::{
-    ErrorData as McpError,
     model::{
         GetPromptResult, ListPromptsResult, Prompt, PromptArgument, PromptMessage,
         PromptMessageContent, PromptMessageRole,
     },
+    ErrorData as McpError,
 };
 
 /// Returns the list of available prompts.

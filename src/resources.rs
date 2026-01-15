@@ -4,35 +4,39 @@
 //! Resources expose data to the client that can be read.
 
 use rmcp::{
+    model::{ListResourcesResult, RawResource, ReadResourceResult, Resource, ResourceContents},
     ErrorData as McpError,
-    model::{
-        ListResourcesResult, RawResource, ReadResourceResult, Resource, ResourceContents,
-    },
 };
 
 /// Returns the list of available resources.
 pub fn list_resources() -> Result<ListResourcesResult, McpError> {
     let resources = vec![
-        Resource::new(RawResource {
-            uri: "info://about".into(),
-            name: "About".into(),
-            title: Some("About This Server".into()),
-            description: Some("Information about this MCP server".into()),
-            mime_type: Some("text/plain".into()),
-            size: None,
-            icons: None,
-            meta: None,
-        }, None),
-        Resource::new(RawResource {
-            uri: "file://example.md".into(),
-            name: "Example Document".into(),
-            title: Some("Example Markdown".into()),
-            description: Some("An example markdown document".into()),
-            mime_type: Some("text/markdown".into()),
-            size: None,
-            icons: None,
-            meta: None,
-        }, None),
+        Resource::new(
+            RawResource {
+                uri: "info://about".into(),
+                name: "About".into(),
+                title: Some("About This Server".into()),
+                description: Some("Information about this MCP server".into()),
+                mime_type: Some("text/plain".into()),
+                size: None,
+                icons: None,
+                meta: None,
+            },
+            None,
+        ),
+        Resource::new(
+            RawResource {
+                uri: "file://example.md".into(),
+                name: "Example Document".into(),
+                title: Some("Example Markdown".into()),
+                description: Some("An example markdown document".into()),
+                mime_type: Some("text/markdown".into()),
+                size: None,
+                icons: None,
+                meta: None,
+            },
+            None,
+        ),
     ];
 
     Ok(ListResourcesResult {

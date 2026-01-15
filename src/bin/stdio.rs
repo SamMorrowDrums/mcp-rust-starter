@@ -30,10 +30,10 @@ async fn main() {
 
     // Create the server and serve via stdio
     let server = McpServer::new();
-    
+
     // The serve_stdio method handles all the stdio transport details
     let service = server.serve(rmcp::transport::stdio()).await;
-    
+
     match service {
         Ok(running) => {
             tracing::info!("Server started successfully");

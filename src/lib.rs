@@ -22,18 +22,17 @@ pub mod tools;
 use std::collections::HashMap;
 
 use rmcp::{
-    ErrorData as McpError, ServerHandler,
     handler::server::tool::ToolRouter,
     model::{
         CallToolResult, Content, GetPromptResult, Implementation, ListPromptsResult,
         ListResourcesResult, ReadResourceResult, ServerCapabilities, ServerInfo,
     },
-    tool, tool_router,
-    service::RequestContext, RoleServer,
+    service::RequestContext,
+    tool, tool_router, ErrorData as McpError, RoleServer, ServerHandler,
 };
 
 // Re-export types for convenience
-pub use tools::{Weather, Operation};
+pub use tools::{Operation, Weather};
 
 /// Server instructions for AI assistants.
 pub const SERVER_INSTRUCTIONS: &str = r"# MCP Rust Starter Server
@@ -136,7 +135,7 @@ impl McpServer {
         let mut rng = rand::thread_rng();
         let conditions = ["sunny", "cloudy", "rainy", "windy"];
         let locations = ["New York", "London", "Tokyo", "Paris"];
-        
+
         let weather = tools::Weather {
             location: locations[rng.gen_range(0..locations.len())].to_string(),
             temperature: rng.gen_range(15..35),
@@ -306,7 +305,8 @@ impl ServerHandler for McpServer {
         request: rmcp::model::CallToolRequestParam,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, McpError> {
-        let tool_context = rmcp::handler::server::tool::ToolCallContext::new(self, request, context);
+        let tool_context =
+            rmcp::handler::server::tool::ToolCallContext::new(self, request, context);
         self.tool_router.call(tool_context).await
     }
 

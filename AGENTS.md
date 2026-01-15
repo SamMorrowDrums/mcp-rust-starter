@@ -2,6 +2,19 @@
 
 This file provides context for AI coding agents working in this repository.
 
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Build | `cargo build` |
+| Build release | `cargo build --release` |
+| Test | `cargo test` |
+| Format | `cargo fmt` |
+| Format check | `cargo fmt --all -- --check` |
+| Lint | `cargo clippy --all-targets --all-features -- -D warnings` |
+| Lint fix | `cargo clippy --fix --allow-dirty` |
+| Run (stdio) | `cargo run --bin mcp-rust-starter-stdio` |
+
 ## Project Overview
 
 **MCP Rust Starter** is a feature-complete Model Context Protocol (MCP) server template in Rust. It demonstrates all major MCP features including tools, resources, resource templates, prompts, sampling, progress updates, and dynamic tool loading.
@@ -10,11 +23,12 @@ This file provides context for AI coding agents working in this repository.
 
 ## Technology Stack
 
-- **Runtime**: Rust 1.75+ (2021 edition)
-- **MCP SDK**: `mcp-server`, `mcp-core`, `mcp-macros`
+- **Runtime**: Rust stable (2021 edition)
+- **MCP SDK**: `rmcp` (official MCP Rust SDK)
 - **Async Runtime**: Tokio
-- **HTTP Server**: Axum
 - **Serialization**: Serde + serde_json
+- **Formatter**: rustfmt (via `cargo fmt`)
+- **Linter**: clippy (pedantic + nursery enabled)
 
 ## Project Structure
 
@@ -48,30 +62,22 @@ cargo build --release
 
 # Run server (stdio transport)
 cargo run --bin mcp-rust-starter-stdio
-
-# Run server (HTTP transport)
-cargo run --bin mcp-rust-starter-http
-# With custom port:
-PORT=8080 cargo run --bin mcp-rust-starter-http
 ```
 
 ## Linting & Formatting
 
 ```bash
-# Format code
+# Format code (required before commit)
 cargo fmt
 
 # Check formatting (CI mode)
-cargo fmt --check
+cargo fmt --all -- --check
 
-# Lint code
-cargo clippy
+# Lint code (CI uses -D warnings to fail on warnings)
+cargo clippy --all-targets --all-features -- -D warnings
 
 # Lint with auto-fix
 cargo clippy --fix --allow-dirty
-
-# Full check
-cargo check
 ```
 
 ## Testing
