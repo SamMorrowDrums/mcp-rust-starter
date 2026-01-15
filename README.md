@@ -1,5 +1,11 @@
 # MCP Rust Starter
 
+[![CI](https://github.com/SamMorrowDrums/mcp-rust-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/SamMorrowDrums/mcp-rust-starter/actions/workflows/ci.yml)
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Clippy](https://img.shields.io/badge/Clippy-pedantic-green?logo=rust&logoColor=white)](https://rust-lang.github.io/rust-clippy/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple)](https://modelcontextprotocol.io/)
+
 A feature-complete Model Context Protocol (MCP) server template in Rust. This starter demonstrates all major MCP features with clean, idiomatic Rust code.
 
 ## 📚 Documentation
