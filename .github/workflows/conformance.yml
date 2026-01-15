@@ -1,0 +1,21 @@
+name: Conformance Test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    uses: SamMorrowDrums/mcp-conformance-action/.github/workflows/conformance.yml@main
+    with:
+      install_command: "cargo fetch"
+      build_command: "cargo build --release"
+      start_command: "./target/release/mcp-rust-starter-stdio"
+      setup_rust: true
+      rust_toolchain: "stable"
