@@ -323,7 +323,7 @@ impl ServerHandler for McpServer {
         request: rmcp::model::ReadResourceRequestParam,
         _context: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResult, McpError> {
-        resources::read_resource(&request.uri.to_string()).await
+        resources::read_resource(&request.uri)
     }
 
     async fn list_prompts(
@@ -345,6 +345,6 @@ impl ServerHandler for McpServer {
                 .filter_map(|(k, v)| v.as_str().map(|s| (k, s.to_string())))
                 .collect::<HashMap<String, String>>()
         });
-        prompts::get_prompt(&request.name, arguments).await
+        prompts::get_prompt(&request.name, arguments)
     }
 }

@@ -14,6 +14,11 @@ use rmcp::{
 };
 
 /// Returns the list of available prompts.
+///
+/// # Errors
+///
+/// This function currently does not return errors, but the Result type
+/// is used for consistency with the MCP protocol.
 pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
     let prompts = vec![
         Prompt {
@@ -76,7 +81,13 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
 }
 
 /// Gets a prompt by name with the given arguments.
-pub async fn get_prompt(
+///
+/// # Errors
+///
+/// Returns `McpError::invalid_params` if the prompt name is not found
+/// or if required arguments are missing.
+#[allow(clippy::implicit_hasher)]
+pub fn get_prompt(
     prompt_name: &str,
     arguments: Option<HashMap<String, String>>,
 ) -> Result<GetPromptResult, McpError> {
@@ -101,8 +112,8 @@ fn greet_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpEr
 
     let text = match style {
         "formal" => format!("Please compose a formal, professional greeting for {name}."),
-        "casual" => format!("Write a casual, friendly hello to {name}."),
         "enthusiastic" => format!("Create an excited, enthusiastic greeting for {name}!"),
+        // Default to casual style for "casual" and any other value
         _ => format!("Write a casual, friendly hello to {name}."),
     };
 

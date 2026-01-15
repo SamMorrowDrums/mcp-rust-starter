@@ -9,6 +9,11 @@ use rmcp::{
 };
 
 /// Returns the list of available resources.
+///
+/// # Errors
+///
+/// This function currently does not return errors, but the Result type
+/// is used for consistency with the MCP protocol.
 pub fn list_resources() -> Result<ListResourcesResult, McpError> {
     let resources = vec![
         Resource::new(
@@ -47,7 +52,12 @@ pub fn list_resources() -> Result<ListResourcesResult, McpError> {
 }
 
 /// Reads a resource by URI and returns its content.
-pub async fn read_resource(uri: &str) -> Result<ReadResourceResult, McpError> {
+///
+/// # Errors
+///
+/// Returns `McpError::resource_not_found` if the URI does not match
+/// any known resource.
+pub fn read_resource(uri: &str) -> Result<ReadResourceResult, McpError> {
     let content = match uri {
         "info://about" => about_content(),
         "file://example.md" => example_document_content(),
@@ -57,12 +67,6 @@ pub async fn read_resource(uri: &str) -> Result<ReadResourceResult, McpError> {
                 None,
             ))
         }
-    };
-
-    let _mime_type = if uri.ends_with(".md") {
-        "text/markdown"
-    } else {
-        "text/plain"
     };
 
     Ok(ReadResourceResult {
