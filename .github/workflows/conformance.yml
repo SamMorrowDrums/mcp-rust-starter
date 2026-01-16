@@ -19,12 +19,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: dtolnay/rust-toolchain@stable
-
       - uses: SamMorrowDrums/mcp-conformance-action@v1
         with:
-          install_command: "cargo fetch"
-          build_command: "cargo build --release"
+          setup_rust: true
+          install_command: cargo fetch
+          build_command: cargo build --release
           configurations: |
             [
               {
