@@ -13,23 +13,29 @@ permissions:
 
 jobs:
   conformance:
-    uses: SamMorrowDrums/mcp-conformance-action/.github/workflows/conformance.yml@v1
-    with:
-      install_command: "cargo fetch"
-      build_command: "cargo build --release"
-      setup_rust: true
-      rust_toolchain: "stable"
-      configurations: |
-        [
-          {
-            "name": "stdio",
-            "transport": "stdio",
-            "start_command": "./target/release/mcp-rust-starter-stdio"
-          },
-          {
-            "name": "streamable-http",
-            "transport": "streamable-http",
-            "start_command": "./target/release/mcp-rust-starter-http",
-            "server_url": "http://localhost:3000/mcp"
-          }
-        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: SamMorrowDrums/mcp-conformance-action@v1
+        with:
+          install_command: "cargo fetch"
+          build_command: "cargo build --release"
+          configurations: |
+            [
+              {
+                "name": "stdio",
+                "transport": "stdio",
+                "start_command": "./target/release/mcp-rust-starter-stdio"
+              },
+              {
+                "name": "streamable-http",
+                "transport": "streamable-http",
+                "start_command": "./target/release/mcp-rust-starter-http",
+                "server_url": "http://localhost:3000/mcp"
+              }
+            ]
