@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   conformance:
-    uses: SamMorrowDrums/mcp-conformance-action/.github/workflows/conformance.yml@v1.1.2
+    uses: SamMorrowDrums/mcp-conformance-action/.github/workflows/conformance.yml@v1.1.5
     with:
       install_command: "cargo fetch"
       build_command: "cargo build --release"
@@ -27,8 +27,8 @@ jobs:
             "start_command": "./target/release/mcp-rust-starter-stdio"
           },
           {
-            "name": "http",
-            "transport": "http",
+            "name": "streamable-http",
+            "transport": "streamable-http",
             "start_command": "./target/release/mcp-rust-starter-http",
             "server_url": "http://localhost:3000/mcp"
           }
