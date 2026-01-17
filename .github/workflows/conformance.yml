@@ -19,11 +19,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: SamMorrowDrums/mcp-conformance-action@v2.2.0
+      - uses: SamMorrowDrums/mcp-conformance-action@v2.3.0
         with:
           setup_rust: true
           install_command: cargo fetch
           build_command: cargo build --release
+          http_start_command: ./target/release/mcp-rust-starter-http
           configurations: |
             [
               {
@@ -34,7 +35,6 @@ jobs:
               {
                 "name": "streamable-http",
                 "transport": "streamable-http",
-                "start_command": "./target/release/mcp-rust-starter-http",
                 "server_url": "http://localhost:3000/mcp"
               }
             ]
