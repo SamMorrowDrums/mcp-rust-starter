@@ -19,14 +19,11 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use axum::{
-    routing::get,
-    Router,
-};
+use axum::{routing::get, Router};
 use mcp_rust_starter::McpServer;
 use rmcp::transport::{
-    StreamableHttpService, StreamableHttpServerConfig,
-    streamable_http_server::session::local::LocalSessionManager,
+    streamable_http_server::session::local::LocalSessionManager, StreamableHttpServerConfig,
+    StreamableHttpService,
 };
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
@@ -47,11 +44,8 @@ async fn main() {
     let session_manager = Arc::new(LocalSessionManager::default());
 
     // Create the MCP service that spawns a new server instance per session
-    let mcp_service = StreamableHttpService::new(
-        move || Ok(McpServer::new()),
-        session_manager,
-        config,
-    );
+    let mcp_service =
+        StreamableHttpService::new(move || Ok(McpServer::new()), session_manager, config);
 
     // Build the router with health check and MCP endpoint
     let cors = CorsLayer::new()
@@ -68,10 +62,10 @@ async fn main() {
     tracing::info!("Health check at http://{}/health", addr);
 
     // Start the server
-    let listener = tokio::net::TcpListener::bind(addr).await.expect("Failed to bind");
-    axum::serve(listener, app)
+    let listener = tokio::net::TcpListener::bind(addr)
         .await
-        .expect("Server error");
+        .expect("Failed to bind");
+    axum::serve(listener, app).await.expect("Server error");
 }
 
 async fn health_check() -> &'static str {
