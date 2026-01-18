@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "mcp-rust-starter",
+  "description": "A Rust MCP server template demonstrating tools, prompts, and resources",
+  "title": "MCP Rust Starter",
+  "repository": {
+    "url": "https://github.com/SamMorrowDrums/mcp-rust-starter",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "cargo",
+      "identifier": "mcp-rust-starter",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "rust",
+      "runtime": "cargo",
+      "command": ["cargo", "install", "--git", "https://github.com/SamMorrowDrums/mcp-rust-starter", "mcp-rust-starter-stdio"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "http://localhost:3000/mcp",
+      "description": "Local HTTP server (run `cargo run --bin mcp-rust-starter-http` first)"
+    }
+  ]
+}
