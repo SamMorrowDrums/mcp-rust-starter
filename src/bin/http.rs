@@ -17,13 +17,17 @@
 //! - [rmcp SDK](https://github.com/anthropics/rust-mcp-sdk)
 
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 use axum::{
     routing::get,
     Router,
 };
 use mcp_rust_starter::McpServer;
-use rmcp::transport::{StreamableHttpService, StreamableHttpServerConfig};
+use rmcp::transport::{
+    StreamableHttpService, StreamableHttpServerConfig,
+    streamable_http_server::session::local::LocalSessionManager,
+};
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -40,10 +44,12 @@ async fn main() {
 
     // Configure the MCP HTTP service
     let config = StreamableHttpServerConfig::default();
+    let session_manager = Arc::new(LocalSessionManager::default());
 
     // Create the MCP service that spawns a new server instance per session
     let mcp_service = StreamableHttpService::new(
-        move || McpServer::new(),
+        move || Ok(McpServer::new()),
+        session_manager,
         config,
     );
 
