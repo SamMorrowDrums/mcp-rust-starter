@@ -42,7 +42,7 @@ pub use tools::Weather;
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct HelloParams {
     /// Name of the person to greet
-    #[schemars(title = "Name", description = "Name of the person to greet")]
+    #[schemars(description = "Name of the person to greet")]
     pub name: String,
 }
 
@@ -50,7 +50,7 @@ pub struct HelloParams {
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct GetWeatherParams {
     /// City name to get weather for
-    #[schemars(title = "City", description = "City name to get weather for")]
+    #[schemars(description = "City name to get weather for")]
     pub city: String,
 }
 
@@ -58,16 +58,12 @@ pub struct GetWeatherParams {
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct LongTaskParams {
     /// Name for this task
-    #[schemars(title = "Task Name", description = "Name for this task")]
+    #[schemars(description = "Name for this task")]
     #[serde(rename = "taskName")]
     pub task_name: String,
 
     /// Number of steps to simulate
-    #[schemars(
-        title = "Steps",
-        description = "Number of steps to simulate",
-        default = "default_steps"
-    )]
+    #[schemars(description = "Number of steps to simulate", default = "default_steps")]
     #[serde(default = "default_steps")]
     pub steps: i32,
 }
@@ -80,15 +76,11 @@ const fn default_steps() -> i32 {
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct AskLlmParams {
     /// The question or prompt to send to the LLM
-    #[schemars(
-        title = "Prompt",
-        description = "The question or prompt to send to the LLM"
-    )]
+    #[schemars(description = "The question or prompt to send to the LLM")]
     pub prompt: String,
 
     /// Maximum tokens in response
     #[schemars(
-        title = "Max Tokens",
         description = "Maximum tokens in response",
         default = "default_max_tokens"
     )]
@@ -104,12 +96,11 @@ const fn default_max_tokens() -> i32 {
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ConfirmActionParams {
     /// Description of the action to confirm
-    #[schemars(title = "Action", description = "Description of the action to confirm")]
+    #[schemars(description = "Description of the action to confirm")]
     pub action: String,
 
     /// Whether the action is destructive
     #[schemars(
-        title = "Destructive",
         description = "Whether the action is destructive",
         default = "default_destructive"
     )]
@@ -125,7 +116,7 @@ const fn default_destructive() -> bool {
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct GetFeedbackParams {
     /// The question to ask the user
-    #[schemars(title = "Question", description = "The question to ask the user")]
+    #[schemars(description = "The question to ask the user")]
     pub question: String,
 }
 

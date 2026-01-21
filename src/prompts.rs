@@ -28,13 +28,13 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
             arguments: Some(vec![
                 PromptArgument {
                     name: "name".into(),
-                    title: Some("Name".into()),
+                    title: None,
                     description: Some("Name of the person to greet".into()),
                     required: Some(true),
                 },
                 PromptArgument {
                     name: "style".into(),
-                    title: Some("Style".into()),
+                    title: None,
                     description: Some("Greeting style (formal/casual)".into()),
                     required: Some(false),
                 },
@@ -48,7 +48,7 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
             description: Some("Review code for potential improvements".into()),
             arguments: Some(vec![PromptArgument {
                 name: "code".into(),
-                title: Some("Code".into()),
+                title: None,
                 description: Some("The code to review".into()),
                 required: Some(true),
             }]),
