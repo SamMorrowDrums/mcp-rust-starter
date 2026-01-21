@@ -22,7 +22,7 @@ pub mod tools;
 use std::collections::HashMap;
 
 use rmcp::{
-    handler::server::tool::ToolRouter,
+    handler::server::{tool::ToolRouter, wrapper::Parameters},
     model::{
         CallToolResult, Content, GetPromptResult, Implementation, ListPromptsResult,
         ListResourcesResult, ReadResourceResult, ServerCapabilities, ServerInfo,
@@ -30,9 +30,104 @@ use rmcp::{
     service::RequestContext,
     tool, tool_router, ErrorData as McpError, RoleServer, ServerHandler,
 };
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 // Re-export types for convenience
-pub use tools::{Operation, Weather};
+pub use tools::Weather;
+
+// Tool parameter structures with JSON Schema generation
+
+/// Parameters for the `hello` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct HelloParams {
+    /// Name of the person to greet
+    #[schemars(title = "Name", description = "Name of the person to greet")]
+    pub name: String,
+}
+
+/// Parameters for the `get_weather` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct GetWeatherParams {
+    /// City name to get weather for
+    #[schemars(title = "City", description = "City name to get weather for")]
+    pub city: String,
+}
+
+/// Parameters for the `long_task` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct LongTaskParams {
+    /// Name for this task
+    #[schemars(title = "Task Name", description = "Name for this task")]
+    #[serde(rename = "taskName")]
+    pub task_name: String,
+
+    /// Number of steps to simulate
+    #[schemars(
+        title = "Steps",
+        description = "Number of steps to simulate",
+        default = "default_steps"
+    )]
+    #[serde(default = "default_steps")]
+    pub steps: i32,
+}
+
+const fn default_steps() -> i32 {
+    5
+}
+
+/// Parameters for the `ask_llm` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct AskLlmParams {
+    /// The question or prompt to send to the LLM
+    #[schemars(
+        title = "Prompt",
+        description = "The question or prompt to send to the LLM"
+    )]
+    pub prompt: String,
+
+    /// Maximum tokens in response
+    #[schemars(
+        title = "Max Tokens",
+        description = "Maximum tokens in response",
+        default = "default_max_tokens"
+    )]
+    #[serde(rename = "maxTokens", default = "default_max_tokens")]
+    pub max_tokens: i32,
+}
+
+const fn default_max_tokens() -> i32 {
+    100
+}
+
+/// Parameters for the `confirm_action` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ConfirmActionParams {
+    /// Description of the action to confirm
+    #[schemars(title = "Action", description = "Description of the action to confirm")]
+    pub action: String,
+
+    /// Whether the action is destructive
+    #[schemars(
+        title = "Destructive",
+        description = "Whether the action is destructive",
+        default = "default_destructive"
+    )]
+    #[serde(default = "default_destructive")]
+    pub destructive: bool,
+}
+
+const fn default_destructive() -> bool {
+    false
+}
+
+/// Parameters for the `get_feedback` tool.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct GetFeedbackParams {
+    /// The question to ask the user
+    #[schemars(title = "Question", description = "The question to ask the user")]
+    pub question: String,
+}
 
 /// Server instructions for AI assistants.
 pub const SERVER_INSTRUCTIONS: &str = r"# MCP Rust Starter Server
@@ -41,17 +136,21 @@ A demonstration MCP server showcasing Rust SDK capabilities.
 
 ## Available Tools
 
-### Greeting & Demos
-- **hello**: Simple greeting - use to test connectivity
-- **get_weather**: Returns simulated weather data
-- **calculator**: Basic arithmetic operations (add, subtract, multiply, divide)
+### Core Tools
+- **hello**: Greet a person by name
+- **get_weather**: Get weather information for a city
+- **long_task**: Simulate a long-running task with progress updates
 
-- **calculator**: Basic arithmetic operations (add, subtract, multiply, divide)
+### Advanced Tools
+- **load_bonus_tool**: Dynamically register a new bonus tool
+- **ask_llm**: Ask the connected LLM a question using sampling
+- **confirm_action**: Request user confirmation before proceeding
+- **get_feedback**: Request feedback from the user
 
 ## Available Resources
 
-- **info://about**: Server information
-- **file://example.md**: Example markdown document
+- **about://server**: Server information
+- **doc://example**: Example markdown document
 
 ## Available Prompts
 
@@ -60,9 +159,9 @@ A demonstration MCP server showcasing Rust SDK capabilities.
 
 ## Recommended Workflows
 
-1. **Testing Connection**: Call `hello` with your name to verify the server is responding
+1. **Testing Connection**: Call `hello` with a name to verify the server is responding
 2. **Weather Demo**: Call `get_weather` with a location to see structured output
-3. **Calculator**: Use `calculator` for basic math operations
+3. **Long Task**: Use `long_task` to see progress updates
 
 ## Tool Annotations
 
@@ -104,7 +203,7 @@ impl McpServer {
     /// A friendly greeting tool that says hello.
     #[tool(
         name = "hello",
-        description = "A friendly greeting tool that says hello",
+        description = "Say hello to a person",
         annotations(
             title = "Say Hello",
             read_only_hint = true,
@@ -113,15 +212,18 @@ impl McpServer {
         ),
         icons = icons::waving_hand()
     )]
-    async fn hello(&self) -> Result<CallToolResult, McpError> {
-        let message = "Hello! Welcome to the MCP Rust Starter Server.";
+    async fn hello(&self, params: Parameters<HelloParams>) -> Result<CallToolResult, McpError> {
+        let message = format!(
+            "Hello, {}! Welcome to the MCP Rust Starter Server.",
+            params.0.name
+        );
         Ok(CallToolResult::success(vec![Content::text(message)]))
     }
 
     /// Get current weather (simulated data).
     #[tool(
         name = "get_weather",
-        description = "Get current weather (simulated). Returns random weather data.",
+        description = "Get the current weather for a city",
         annotations(
             title = "Get Weather",
             read_only_hint = true,
@@ -130,14 +232,16 @@ impl McpServer {
         ),
         icons = icons::sun_behind_cloud()
     )]
-    async fn get_weather(&self) -> Result<CallToolResult, McpError> {
+    async fn get_weather(
+        &self,
+        params: Parameters<GetWeatherParams>,
+    ) -> Result<CallToolResult, McpError> {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let conditions = ["sunny", "cloudy", "rainy", "windy"];
-        let locations = ["New York", "London", "Tokyo", "Paris"];
 
         let weather = tools::Weather {
-            location: locations[rng.gen_range(0..locations.len())].to_string(),
+            location: params.0.city.clone(),
             temperature: rng.gen_range(15..35),
             unit: "celsius".to_string(),
             conditions: conditions[rng.gen_range(0..conditions.len())].to_string(),
@@ -150,51 +254,61 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// Get server status.
+    /// Simulate a long-running task with progress updates.
     #[tool(
-        name = "server_status",
-        description = "Get current server status and uptime information",
+        name = "long_task",
+        description = "Simulate a long-running task with progress updates",
         annotations(
-            title = "Server Status",
+            title = "Long Task",
             read_only_hint = true,
-            idempotent_hint = true,
+            idempotent_hint = false,
             open_world_hint = false
         ),
-        icons = icons::robot()
+        icons = icons::hourglass()
     )]
-    async fn server_status(&self) -> Result<CallToolResult, McpError> {
-        let status = serde_json::json!({
-            "status": "running",
-            "server_name": "mcp-rust-starter",
-            "version": "1.0.0",
-            "sdk": "rmcp 0.11"
-        });
+    async fn long_task(
+        &self,
+        params: Parameters<LongTaskParams>,
+    ) -> Result<CallToolResult, McpError> {
+        use std::fmt::Write;
 
-        let json_str = serde_json::to_string_pretty(&status)
-            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+        // Simulate a long task with progress updates
+        let steps = params.0.steps;
+        let task_name = &params.0.task_name;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        let mut result = format!("Starting task '{task_name}' with {steps} steps:\n");
+
+        for i in 1..=steps {
+            // In a real implementation, this would send progress notifications
+            writeln!(&mut result, "Step {i}/{steps} completed").unwrap();
+            // Simulate work
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        }
+
+        write!(&mut result, "Task '{task_name}' completed successfully!").unwrap();
+
+        Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    /// Calculator tool demonstrating enum parameters.
+    /// Dynamically register a new bonus tool.
     #[tool(
-        name = "calculator",
-        description = "A basic calculator that performs arithmetic operations",
+        name = "load_bonus_tool",
+        description = "Dynamically register a new bonus tool",
         annotations(
-            title = "Calculator",
-            read_only_hint = true,
-            idempotent_hint = true,
+            title = "Load Bonus Tool",
+            read_only_hint = false,
+            idempotent_hint = false,
             open_world_hint = false
         ),
-        icons = icons::abacus()
+        icons = icons::package()
     )]
-    async fn calculator(&self) -> Result<CallToolResult, McpError> {
-        // Note: rmcp 0.11 has limited support for parameterized tools
-        // This demo shows the tool structure - in practice you'd parse params from request
+    async fn load_bonus_tool(&self) -> Result<CallToolResult, McpError> {
+        // In a full implementation, this would dynamically register a new tool
         let result = serde_json::json!({
-            "hint": "This calculator accepts a, b (numbers) and operation (add/subtract/multiply/divide)",
-            "example": "10 + 5 = 15",
-            "supported_operations": ["add", "subtract", "multiply", "divide"]
+            "note": "This tool demonstrates dynamic tool loading capability.",
+            "description": "In a full implementation, this would register a new 'bonus_tool' that clients can discover and call.",
+            "usage": "Call this tool to trigger dynamic tool registration.",
+            "limitation": "rmcp SDK does not currently support runtime tool registration, so this is a placeholder."
         });
 
         let json_str = serde_json::to_string_pretty(&result)
@@ -203,16 +317,40 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    // Note: Elicitation tools would require access to the RequestContext
-    // which is not available in the tool_router macro. These are placeholder
-    // implementations showing the pattern. Full elicitation requires custom
-    // call_tool implementation.
+    /// Ask the connected LLM a question using sampling.
+    #[tool(
+        name = "ask_llm",
+        description = "Ask the connected LLM a question using sampling",
+        annotations(
+            title = "Ask LLM",
+            read_only_hint = true,
+            idempotent_hint = false,
+            open_world_hint = true
+        ),
+        icons = icons::thought_balloon()
+    )]
+    async fn ask_llm(&self, params: Parameters<AskLlmParams>) -> Result<CallToolResult, McpError> {
+        // In a full implementation, this would use the MCP sampling feature to ask the LLM
+        let result = serde_json::json!({
+            "note": "This tool demonstrates MCP sampling capability.",
+            "prompt": params.0.prompt,
+            "max_tokens": params.0.max_tokens,
+            "description": "In a full implementation, this would use context.peer().create_message() to request sampling from the connected LLM.",
+            "usage": "Call with a 'prompt' parameter to ask a question.",
+            "sampling_support": "Requires rmcp 'sampling' feature and client support."
+        });
+
+        let json_str = serde_json::to_string_pretty(&result)
+            .map_err(|e| McpError::internal_error(e.to_string(), None))?;
+
+        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+    }
 
     /// Request user confirmation before proceeding with an action.
     /// Demonstrates elicitation capability for user interaction.
     #[tool(
         name = "confirm_action",
-        description = "Request user confirmation. Uses MCP elicitation to get user approval before proceeding with an action.",
+        description = "Request user confirmation before proceeding",
         annotations(
             title = "Confirm Action",
             read_only_hint = true,
@@ -221,11 +359,16 @@ impl McpServer {
         ),
         icons = icons::question()
     )]
-    async fn confirm_action(&self) -> Result<CallToolResult, McpError> {
+    async fn confirm_action(
+        &self,
+        params: Parameters<ConfirmActionParams>,
+    ) -> Result<CallToolResult, McpError> {
         // In a full implementation, this would use:
         // let result = context.peer().elicit::<ConfirmSchema>("Confirm action?").await;
         let result = serde_json::json!({
             "note": "This tool demonstrates MCP elicitation capability.",
+            "action": params.0.action,
+            "destructive": params.0.destructive,
             "description": "In a full implementation, this would request user confirmation via the MCP elicitation protocol.",
             "usage": "Call with an 'action' parameter describing what needs confirmation.",
             "elicitation_support": "Requires rmcp 'elicitation' feature and client support."
@@ -241,7 +384,7 @@ impl McpServer {
     /// Demonstrates elicitation with text input schema.
     #[tool(
         name = "get_feedback",
-        description = "Collect user feedback. Uses MCP elicitation to gather text input from the user.",
+        description = "Request feedback from the user",
         annotations(
             title = "Get Feedback",
             read_only_hint = true,
@@ -250,13 +393,17 @@ impl McpServer {
         ),
         icons = icons::speech()
     )]
-    async fn get_feedback(&self) -> Result<CallToolResult, McpError> {
+    async fn get_feedback(
+        &self,
+        params: Parameters<GetFeedbackParams>,
+    ) -> Result<CallToolResult, McpError> {
         // In a full implementation, this would use:
         // let feedback = context.peer().elicit::<FeedbackSchema>("Please provide feedback").await;
         let result = serde_json::json!({
             "note": "This tool demonstrates MCP elicitation capability for text input.",
+            "question": params.0.question,
             "description": "In a full implementation, this would request feedback via the MCP elicitation protocol.",
-            "usage": "Call with a 'prompt' parameter describing what feedback is needed.",
+            "usage": "Call with a 'question' parameter describing what feedback is needed.",
             "elicitation_support": "Requires rmcp 'elicitation' feature and client support."
         });
 
@@ -316,6 +463,14 @@ impl ServerHandler for McpServer {
         _context: RequestContext<RoleServer>,
     ) -> Result<ListResourcesResult, McpError> {
         resources::list_resources()
+    }
+
+    async fn list_resource_templates(
+        &self,
+        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _context: RequestContext<RoleServer>,
+    ) -> Result<rmcp::model::ListResourceTemplatesResult, McpError> {
+        resources::list_resource_templates()
     }
 
     async fn read_resource(
