@@ -23,7 +23,7 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
     let prompts = vec![
         Prompt {
             name: "greet".into(),
-            title: Some("Greeting Generator".into()),
+            title: Some("Greeting Prompt".into()),
             description: Some("Generate a greeting message".into()),
             arguments: Some(vec![
                 PromptArgument {

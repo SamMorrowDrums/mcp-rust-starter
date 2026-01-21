@@ -198,6 +198,7 @@ impl McpServer {
         annotations(
             title = "Say Hello",
             read_only_hint = true,
+            destructive_hint = false,
             idempotent_hint = true,
             open_world_hint = false
         ),
@@ -218,6 +219,7 @@ impl McpServer {
         annotations(
             title = "Get Weather",
             read_only_hint = true,
+            destructive_hint = false,
             idempotent_hint = false,
             open_world_hint = false
         ),
@@ -250,9 +252,10 @@ impl McpServer {
         name = "long_task",
         description = "Simulate a long-running task with progress updates",
         annotations(
-            title = "Long Task",
+            title = "Long Running Task",
             read_only_hint = true,
-            idempotent_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
             open_world_hint = false
         ),
         icons = icons::hourglass()
@@ -288,7 +291,8 @@ impl McpServer {
         annotations(
             title = "Load Bonus Tool",
             read_only_hint = false,
-            idempotent_hint = false,
+            destructive_hint = false,
+            idempotent_hint = true,
             open_world_hint = false
         ),
         icons = icons::package()
@@ -315,8 +319,9 @@ impl McpServer {
         annotations(
             title = "Ask LLM",
             read_only_hint = true,
+            destructive_hint = false,
             idempotent_hint = false,
-            open_world_hint = true
+            open_world_hint = false
         ),
         icons = icons::thought_balloon()
     )]
@@ -345,7 +350,8 @@ impl McpServer {
         annotations(
             title = "Confirm Action",
             read_only_hint = true,
-            idempotent_hint = true,
+            destructive_hint = false,
+            idempotent_hint = false,
             open_world_hint = false
         ),
         icons = icons::question()
@@ -379,8 +385,9 @@ impl McpServer {
         annotations(
             title = "Get Feedback",
             read_only_hint = true,
-            idempotent_hint = true,
-            open_world_hint = false
+            destructive_hint = false,
+            idempotent_hint = false,
+            open_world_hint = true
         ),
         icons = icons::speech()
     )]
