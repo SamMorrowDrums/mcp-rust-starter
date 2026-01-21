@@ -24,18 +24,18 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
         Prompt {
             name: "greet".into(),
             title: Some("Greeting Generator".into()),
-            description: Some("Generate a greeting in a specific style".into()),
+            description: Some("Generate a greeting message".into()),
             arguments: Some(vec![
                 PromptArgument {
                     name: "name".into(),
-                    title: Some("Name".into()),
+                    title: None,
                     description: Some("Name of the person to greet".into()),
                     required: Some(true),
                 },
                 PromptArgument {
                     name: "style".into(),
-                    title: Some("Style".into()),
-                    description: Some("The greeting style (formal, casual, enthusiastic)".into()),
+                    title: None,
+                    description: Some("Greeting style (formal/casual)".into()),
                     required: Some(false),
                 },
             ]),
@@ -45,29 +45,13 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
         Prompt {
             name: "code_review".into(),
             title: Some("Code Review".into()),
-            description: Some("Request a code review with specific focus areas".into()),
-            arguments: Some(vec![
-                PromptArgument {
-                    name: "code".into(),
-                    title: Some("Code".into()),
-                    description: Some("The code to review".into()),
-                    required: Some(true),
-                },
-                PromptArgument {
-                    name: "language".into(),
-                    title: Some("Language".into()),
-                    description: Some("Programming language".into()),
-                    required: Some(true),
-                },
-                PromptArgument {
-                    name: "focus".into(),
-                    title: Some("Focus Area".into()),
-                    description: Some(
-                        "What to focus on (security, performance, readability, all)".into(),
-                    ),
-                    required: Some(false),
-                },
-            ]),
+            description: Some("Review code for potential improvements".into()),
+            arguments: Some(vec![PromptArgument {
+                name: "code".into(),
+                title: None,
+                description: Some("The code to review".into()),
+                required: Some(true),
+            }]),
             icons: None,
             meta: None,
         },
@@ -131,22 +115,8 @@ fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult,
         McpError::invalid_params("Missing required 'code' argument".to_string(), None)
     })?;
 
-    let language = args.get("language").ok_or_else(|| {
-        McpError::invalid_params("Missing required 'language' argument".to_string(), None)
-    })?;
-
-    let focus = args.get("focus").map_or("all", String::as_str);
-
-    let focus_instruction = match focus {
-        "security" => "Focus on security vulnerabilities and potential exploits.",
-        "performance" => "Focus on performance optimizations and efficiency issues.",
-        "readability" => "Focus on code clarity, naming, and maintainability.",
-        _ => "Provide a comprehensive review covering security, performance, and readability.",
-    };
-
-    let text = format!(
-        "Please review the following {language} code. {focus_instruction}\n\n```{language}\n{code}\n```"
-    );
+    let text =
+        format!("Please review the following code and provide feedback:\n\n```\n{code}\n```");
 
     Ok(GetPromptResult {
         description: Some("Code review request".into()),

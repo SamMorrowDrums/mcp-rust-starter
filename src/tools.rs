@@ -24,31 +24,6 @@ pub struct Weather {
     pub humidity: i32,
 }
 
-/// Calculator operations - demonstrates using enums in MCP tool schemas.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum Operation {
-    /// Add two numbers
-    Add,
-    /// Subtract second from first  
-    Subtract,
-    /// Multiply two numbers
-    Multiply,
-    /// Divide first by second
-    Divide,
-}
-
-impl std::fmt::Display for Operation {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Add => write!(f, "add"),
-            Self::Subtract => write!(f, "subtract"),
-            Self::Multiply => write!(f, "multiply"),
-            Self::Divide => write!(f, "divide"),
-        }
-    }
-}
-
 // Note: Tool implementations are in lib.rs using the #[tool_router] macro.
 // The rmcp SDK handles tool parameter parsing automatically.
 // See the tool methods in McpServer impl block in lib.rs.
