@@ -22,7 +22,7 @@ pub mod tools;
 use std::collections::HashMap;
 
 use rmcp::{
-    handler::server::{tool::ToolRouter, wrapper::Parameters},
+    handler::server::{tool::schema_for_type, tool::ToolRouter, wrapper::Parameters},
     model::{
         CallToolResult, Content, GetPromptResult, Implementation, ListPromptsResult,
         ListResourcesResult, ReadResourceResult, ServerCapabilities, ServerInfo,
@@ -34,36 +34,46 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 // Re-export types for convenience
-pub use tools::Weather;
+pub use tools::{
+    AskLlmResponse, ConfirmActionResponse, GetFeedbackResponse, HelloResponse,
+    LoadBonusToolResponse, LongTaskResponse, Weather,
+};
 
 // Tool parameter structures with JSON Schema generation
 
 /// Parameters for the `hello` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "helloArguments")]
 pub struct HelloParams {
     /// Name of the person to greet
-    #[schemars(description = "Name of the person to greet")]
+    #[schemars(title = "Name", description = "Name of the person to greet")]
     pub name: String,
 }
 
 /// Parameters for the `get_weather` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "get_weatherArguments")]
 pub struct GetWeatherParams {
     /// City name to get weather for
-    #[schemars(description = "City name to get weather for")]
+    #[schemars(title = "City", description = "City name to get weather for")]
     pub city: String,
 }
 
 /// Parameters for the `long_task` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "long_taskArguments")]
 pub struct LongTaskParams {
     /// Name for this task
-    #[schemars(description = "Name for this task")]
+    #[schemars(title = "Task Name", description = "Name for this task")]
     #[serde(rename = "taskName")]
     pub task_name: String,
 
     /// Number of steps to simulate
-    #[schemars(description = "Number of steps to simulate", default = "default_steps")]
+    #[schemars(
+        title = "Steps",
+        description = "Number of steps to simulate",
+        default = "default_steps"
+    )]
     #[serde(default = "default_steps")]
     pub steps: i32,
 }
@@ -74,13 +84,18 @@ const fn default_steps() -> i32 {
 
 /// Parameters for the `ask_llm` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "ask_llmArguments")]
 pub struct AskLlmParams {
     /// The question or prompt to send to the LLM
-    #[schemars(description = "The question or prompt to send to the LLM")]
+    #[schemars(
+        title = "Prompt",
+        description = "The question or prompt to send to the LLM"
+    )]
     pub prompt: String,
 
     /// Maximum tokens in response
     #[schemars(
+        title = "Max Tokens",
         description = "Maximum tokens in response",
         default = "default_max_tokens"
     )]
@@ -94,13 +109,15 @@ const fn default_max_tokens() -> i32 {
 
 /// Parameters for the `confirm_action` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "confirm_actionArguments")]
 pub struct ConfirmActionParams {
     /// Description of the action to confirm
-    #[schemars(description = "Description of the action to confirm")]
+    #[schemars(title = "Action", description = "Description of the action to confirm")]
     pub action: String,
 
     /// Whether the action is destructive
     #[schemars(
+        title = "Destructive",
         description = "Whether the action is destructive",
         default = "default_destructive"
     )]
@@ -114,55 +131,16 @@ const fn default_destructive() -> bool {
 
 /// Parameters for the `get_feedback` tool.
 #[derive(Serialize, Deserialize, JsonSchema)]
+#[schemars(title = "get_feedbackArguments")]
 pub struct GetFeedbackParams {
     /// The question to ask the user
-    #[schemars(description = "The question to ask the user")]
+    #[schemars(title = "Question", description = "The question to ask the user")]
     pub question: String,
 }
 
 /// Server instructions for AI assistants.
-pub const SERVER_INSTRUCTIONS: &str = r"# MCP Rust Starter Server
-
-A demonstration MCP server showcasing Rust SDK capabilities.
-
-## Available Tools
-
-### Core Tools
-- **hello**: Greet a person by name
-- **get_weather**: Get weather information for a city
-- **long_task**: Simulate a long-running task with progress updates
-
-### Advanced Tools
-- **load_bonus_tool**: Dynamically register a new bonus tool
-- **ask_llm**: Ask the connected LLM a question using sampling
-- **confirm_action**: Request user confirmation before proceeding
-- **get_feedback**: Request feedback from the user
-
-## Available Resources
-
-- **about://server**: Server information
-- **doc://example**: Example markdown document
-
-## Available Prompts
-
-- **greet**: Generates a personalized greeting
-- **code_review**: Structured code review prompt
-
-## Recommended Workflows
-
-1. **Testing Connection**: Call `hello` with a name to verify the server is responding
-2. **Weather Demo**: Call `get_weather` with a location to see structured output
-3. **Long Task**: Use `long_task` to see progress updates
-
-## Tool Annotations
-
-All tools include annotations indicating:
-- title: Human-readable name for display
-- read_only_hint: Whether they modify state
-- idempotent_hint: If they're safe to retry
-- open_world_hint: Whether they access external systems
-
-Use these hints to make informed decisions about tool usage.";
+pub const SERVER_INSTRUCTIONS: &str =
+    "MCP Rust Starter - A demonstration server showcasing core MCP features";
 
 /// The main MCP server implementing all handlers.
 #[derive(Clone)]
@@ -195,6 +173,7 @@ impl McpServer {
     #[tool(
         name = "hello",
         description = "Say hello to a person",
+        output_schema = schema_for_type::<HelloResponse>(),
         annotations(
             title = "Say Hello",
             read_only_hint = true,
@@ -216,6 +195,7 @@ impl McpServer {
     #[tool(
         name = "get_weather",
         description = "Get the current weather for a city",
+        output_schema = schema_for_type::<Weather>(),
         annotations(
             title = "Get Weather",
             read_only_hint = true,
@@ -251,6 +231,7 @@ impl McpServer {
     #[tool(
         name = "long_task",
         description = "Simulate a long-running task with progress updates",
+        output_schema = schema_for_type::<LongTaskResponse>(),
         annotations(
             title = "Long Running Task",
             read_only_hint = true,
@@ -288,6 +269,7 @@ impl McpServer {
     #[tool(
         name = "load_bonus_tool",
         description = "Dynamically register a new bonus tool",
+        output_schema = schema_for_type::<LoadBonusToolResponse>(),
         annotations(
             title = "Load Bonus Tool",
             read_only_hint = false,
@@ -316,6 +298,7 @@ impl McpServer {
     #[tool(
         name = "ask_llm",
         description = "Ask the connected LLM a question using sampling",
+        output_schema = schema_for_type::<AskLlmResponse>(),
         annotations(
             title = "Ask LLM",
             read_only_hint = true,
@@ -347,6 +330,7 @@ impl McpServer {
     #[tool(
         name = "confirm_action",
         description = "Request user confirmation before proceeding",
+        output_schema = schema_for_type::<ConfirmActionResponse>(),
         annotations(
             title = "Confirm Action",
             read_only_hint = true,
@@ -382,6 +366,7 @@ impl McpServer {
     #[tool(
         name = "get_feedback",
         description = "Request feedback from the user",
+        output_schema = schema_for_type::<GetFeedbackResponse>(),
         annotations(
             title = "Get Feedback",
             read_only_hint = true,
@@ -419,14 +404,19 @@ impl ServerHandler for McpServer {
             server_info: Implementation {
                 name: "mcp-rust-starter".into(),
                 version: "1.0.0".into(),
-                title: Some("MCP Rust Starter".into()),
+                title: None,
                 icons: None,
                 website_url: None,
             },
             capabilities: ServerCapabilities::builder()
+                .enable_experimental()
                 .enable_prompts()
+                .enable_prompts_list_changed()
                 .enable_resources()
+                .enable_resources_list_changed()
+                .enable_resources_subscribe()
                 .enable_tools()
+                .enable_tool_list_changed()
                 .build(),
             instructions: Some(SERVER_INSTRUCTIONS.into()),
             ..Default::default()
