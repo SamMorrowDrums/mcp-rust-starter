@@ -18,7 +18,7 @@ path = "src/bin/http.rs"
 
 [dependencies]
 # Official MCP Rust SDK (rmcp) - https://crates.io/crates/rmcp
-rmcp = { version = "0.13", features = ["server", "macros", "transport-io", "transport-streamable-http-server", "schemars", "elicitation"] }
+rmcp = { version = "0.14", features = ["server", "macros", "transport-io", "transport-streamable-http-server", "schemars", "elicitation"] }
 
 # Async runtime
 tokio = { version = "1", features = ["full", "macros", "rt-multi-thread"] }
