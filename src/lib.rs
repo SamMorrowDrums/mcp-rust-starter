@@ -210,15 +210,15 @@ impl McpServer {
         params: Parameters<GetWeatherParams>,
     ) -> Result<CallToolResult, McpError> {
         use rand::Rng;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let conditions = ["sunny", "cloudy", "rainy", "windy"];
 
         let weather = tools::Weather {
             location: params.0.city.clone(),
-            temperature: rng.gen_range(15..35),
+            temperature: rng.random_range(15..35),
             unit: "celsius".to_string(),
-            conditions: conditions[rng.gen_range(0..conditions.len())].to_string(),
-            humidity: rng.gen_range(40..80),
+            conditions: conditions[rng.random_range(0..conditions.len())].to_string(),
+            humidity: rng.random_range(40..80),
         };
 
         let json_str = serde_json::to_string_pretty(&weather)
