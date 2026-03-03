@@ -412,10 +412,7 @@ impl ServerHandler for McpServer {
             capabilities: ServerCapabilities::builder()
                 .enable_experimental()
                 .enable_prompts()
-                .enable_prompts_list_changed()
                 .enable_resources()
-                .enable_resources_list_changed()
-                .enable_resources_subscribe()
                 .enable_tools()
                 .enable_tool_list_changed()
                 .build(),
