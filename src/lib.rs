@@ -39,6 +39,20 @@ pub use tools::{
     LoadBonusToolResponse, LongTaskResponse, Weather,
 };
 
+// =============================================================================
+// TOOL ANNOTATIONS - Every tool SHOULD have annotations for AI assistants
+//
+// WHY ANNOTATIONS MATTER:
+// Annotations enable MCP client applications to understand the risk level of
+// tool calls. Clients can use these hints to implement safety policies.
+//
+// ANNOTATION FIELDS:
+// - readOnlyHint: Tool only reads data, doesn't modify state
+// - destructiveHint: Tool can permanently delete or modify data
+// - idempotentHint: Repeated calls with same args have same effect
+// - openWorldHint: Tool accesses external systems (web, APIs, etc.)
+// =============================================================================
+
 // Tool parameter structures with JSON Schema generation
 
 /// Parameters for the `hello` tool.
@@ -165,11 +179,17 @@ impl McpServer {
     }
 }
 
-/// Tool implementations using rmcp macros.
-/// Each tool has proper annotations including a human-readable title.
+// =============================================================================
+// TOOLS
+// Tools are functions that the client can invoke to perform actions.
+// Each tool uses the #[tool] macro with annotations and an output_schema.
+// =============================================================================
+
 #[tool_router]
 impl McpServer {
-    /// A friendly greeting tool that says hello.
+    /// **hello** – Basic connectivity test.
+    /// The simplest possible tool: takes a name, returns a greeting.
+    /// Use this to verify the server is running and reachable.
     #[tool(
         name = "hello",
         description = "Say hello to a person",
@@ -191,7 +211,9 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(message)]))
     }
 
-    /// Get current weather (simulated data).
+    /// **get_weather** – Structured output with `output_schema`.
+    /// Demonstrates returning typed JSON data (the `Weather` struct) so that
+    /// clients can validate the response shape at runtime.
     #[tool(
         name = "get_weather",
         description = "Get the current weather for a city",
@@ -227,7 +249,10 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// Simulate a long-running task with progress updates.
+    /// **long_task** – Progress reporting via notifications.
+    /// Shows how a tool can report incremental progress to the client.
+    /// In a full implementation, each step would send a `notifications/progress`
+    /// message so the client can display a progress bar.
     #[tool(
         name = "long_task",
         description = "Simulate a long-running task with progress updates",
@@ -265,7 +290,11 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    /// Dynamically register a new bonus tool.
+    /// **load_bonus_tool** – Dynamic tool registration (`listChanged` notification).
+    /// Demonstrates adding tools at runtime. When called, the server would
+    /// register a new tool and send a `notifications/tools/list_changed`
+    /// notification so clients refresh their tool list.
+    /// This is why `enable_tool_list_changed()` is set in `get_info()`.
     #[tool(
         name = "load_bonus_tool",
         description = "Dynamically register a new bonus tool",
@@ -294,7 +323,10 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// Ask the connected LLM a question using sampling.
+    /// **ask_llm** – LLM sampling capability.
+    /// Demonstrates MCP sampling: the server asks the *client's* LLM a question.
+    /// This inverts the usual flow — instead of the client calling the server,
+    /// the server requests a completion from the client via `create_message()`.
     #[tool(
         name = "ask_llm",
         description = "Ask the connected LLM a question using sampling",
@@ -325,8 +357,10 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// Request user confirmation before proceeding with an action.
-    /// Demonstrates elicitation capability for user interaction.
+    /// **confirm_action** – Schema elicitation.
+    /// Demonstrates MCP elicitation: the server presents a structured form
+    /// (JSON Schema) to the user and collects their input. Useful for
+    /// confirmation dialogs, settings forms, or multi-field input.
     #[tool(
         name = "confirm_action",
         description = "Request user confirmation before proceeding",
@@ -361,8 +395,10 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// Collect feedback from the user.
-    /// Demonstrates elicitation with text input schema.
+    /// **get_feedback** – URL elicitation.
+    /// Demonstrates MCP elicitation via URL: the server asks the client to
+    /// open a URL (e.g. a feedback form) and waits for the result.
+    /// Note `open_world_hint = true` because it directs the user to an external URL.
     #[tool(
         name = "get_feedback",
         description = "Request feedback from the user",
@@ -398,7 +434,24 @@ impl McpServer {
 }
 
 /// Server handler implementation for MCP protocol.
+///
+/// `ServerHandler` is the main trait from rmcp that wires your server into
+/// the MCP lifecycle: capability negotiation, tool/resource/prompt listing,
+/// and request dispatch.
 impl ServerHandler for McpServer {
+    /// Returns server metadata and capability flags.
+    ///
+    /// The `ServerCapabilities` builder declares which MCP features this
+    /// server supports. Each `.enable_*()` call opts in to a feature:
+    ///
+    /// - `enable_tools()`            – server exposes callable tools
+    /// - `enable_tool_list_changed()` – server may add/remove tools at runtime
+    ///   (needed because `load_bonus_tool` dynamically registers a new tool)
+    /// - `enable_resources()`         – server exposes readable resources
+    /// - `enable_prompts()`           – server exposes prompt templates
+    ///
+    /// Prompts and resources do NOT enable `list_changed` because this server's
+    /// prompt and resource lists are static — they never change after startup.
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             server_info: Implementation {
@@ -421,6 +474,9 @@ impl ServerHandler for McpServer {
         }
     }
 
+    // -- Tool handlers --
+
+    /// Lists all tools registered with this server (via the `#[tool_router]` macro).
     async fn list_tools(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
@@ -433,6 +489,7 @@ impl ServerHandler for McpServer {
         })
     }
 
+    /// Dispatches a `tools/call` request to the matching tool implementation.
     async fn call_tool(
         &self,
         request: rmcp::model::CallToolRequestParams,
@@ -443,6 +500,9 @@ impl ServerHandler for McpServer {
         self.tool_router.call(tool_context).await
     }
 
+    // -- Resource handlers (read-only data exposed to clients) --
+
+    /// Lists static resources available on this server.
     async fn list_resources(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
@@ -451,6 +511,7 @@ impl ServerHandler for McpServer {
         resources::list_resources()
     }
 
+    /// Lists resource templates (parameterised URI patterns like `greeting://{name}`).
     async fn list_resource_templates(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
@@ -459,6 +520,7 @@ impl ServerHandler for McpServer {
         resources::list_resource_templates()
     }
 
+    /// Reads a resource by URI, returning its content.
     async fn read_resource(
         &self,
         request: rmcp::model::ReadResourceRequestParams,
@@ -467,6 +529,9 @@ impl ServerHandler for McpServer {
         resources::read_resource(&request.uri)
     }
 
+    // -- Prompt handlers (reusable message templates) --
+
+    /// Lists all prompt templates this server offers.
     async fn list_prompts(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
@@ -475,6 +540,7 @@ impl ServerHandler for McpServer {
         prompts::list_prompts()
     }
 
+    /// Retrieves a prompt by name, filling in the supplied arguments.
     async fn get_prompt(
         &self,
         request: rmcp::model::GetPromptRequestParams,

@@ -1,7 +1,12 @@
 //! # MCP Rust Starter - Resources
 //!
-//! Resource definitions for the MCP server using rmcp SDK.
-//! Resources expose data to the client that can be read.
+//! Resources expose **read-only data** to MCP clients. Unlike tools (which
+//! perform actions), resources simply return content when read — similar to
+//! GET endpoints in a REST API.
+//!
+//! This module demonstrates two patterns:
+//! - **Static resources** with fixed URIs (`about://server`, `doc://example`)
+//! - **Resource templates** with parameterised URIs (`greeting://{name}`, `item://{id}`)
 
 use rmcp::{
     model::{

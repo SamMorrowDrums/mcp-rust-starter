@@ -1,7 +1,12 @@
 //! # MCP Rust Starter - Prompts
 //!
-//! Prompt template definitions for the MCP server using rmcp SDK.
-//! Prompts are pre-configured message templates the client can use.
+//! Prompts are **reusable message templates** that clients can retrieve and
+//! fill with arguments. Think of them as "saved prompts" — the server defines
+//! the template structure, and the client supplies the values.
+//!
+//! This module demonstrates two prompt templates:
+//! - **greet** – generates a personalised greeting in different styles
+//! - **code_review** – creates a structured code review request
 
 use std::collections::HashMap;
 
