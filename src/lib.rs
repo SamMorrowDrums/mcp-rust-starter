@@ -405,6 +405,7 @@ impl ServerHandler for McpServer {
                 name: "mcp-rust-starter".into(),
                 version: "1.0.0".into(),
                 title: None,
+                description: None,
                 icons: None,
                 website_url: None,
             },
@@ -425,7 +426,7 @@ impl ServerHandler for McpServer {
 
     async fn list_tools(
         &self,
-        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<rmcp::model::ListToolsResult, McpError> {
         Ok(rmcp::model::ListToolsResult {
@@ -437,7 +438,7 @@ impl ServerHandler for McpServer {
 
     async fn call_tool(
         &self,
-        request: rmcp::model::CallToolRequestParam,
+        request: rmcp::model::CallToolRequestParams,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, McpError> {
         let tool_context =
@@ -447,7 +448,7 @@ impl ServerHandler for McpServer {
 
     async fn list_resources(
         &self,
-        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<ListResourcesResult, McpError> {
         resources::list_resources()
@@ -455,7 +456,7 @@ impl ServerHandler for McpServer {
 
     async fn list_resource_templates(
         &self,
-        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<rmcp::model::ListResourceTemplatesResult, McpError> {
         resources::list_resource_templates()
@@ -463,7 +464,7 @@ impl ServerHandler for McpServer {
 
     async fn read_resource(
         &self,
-        request: rmcp::model::ReadResourceRequestParam,
+        request: rmcp::model::ReadResourceRequestParams,
         _context: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResult, McpError> {
         resources::read_resource(&request.uri)
@@ -471,7 +472,7 @@ impl ServerHandler for McpServer {
 
     async fn list_prompts(
         &self,
-        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<ListPromptsResult, McpError> {
         prompts::list_prompts()
@@ -479,7 +480,7 @@ impl ServerHandler for McpServer {
 
     async fn get_prompt(
         &self,
-        request: rmcp::model::GetPromptRequestParam,
+        request: rmcp::model::GetPromptRequestParams,
         _context: RequestContext<RoleServer>,
     ) -> Result<GetPromptResult, McpError> {
         // Convert serde_json::Map to HashMap<String, String>
