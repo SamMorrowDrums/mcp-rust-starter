@@ -153,8 +153,57 @@ pub struct GetFeedbackParams {
 }
 
 /// Server instructions for AI assistants.
-pub const SERVER_INSTRUCTIONS: &str =
-    "MCP Rust Starter - A demonstration server showcasing core MCP features";
+pub const SERVER_INSTRUCTIONS: &str = "# MCP Rust Starter Server
+
+A demonstration MCP server showcasing Rust SDK capabilities.
+
+## Available Tools
+
+### Greeting & Demos
+- **hello**: Simple greeting - use to test connectivity
+- **get_weather**: Returns simulated weather data
+- **long_task**: Demonstrates progress reporting (takes ~5 seconds)
+
+### LLM Interaction
+- **ask_llm**: Invoke LLM sampling to ask questions (requires client support)
+
+### Dynamic Features
+- **load_bonus_tool**: Dynamically adds a calculator tool at runtime
+- **bonus_calculator**: Available after calling load_bonus_tool
+
+### Elicitation (User Input)
+- **confirm_action**: Demonstrates schema elicitation - requests user confirmation
+- **get_feedback**: Demonstrates URL elicitation - opens feedback form in browser
+
+## Available Resources
+
+- **about://server**: Server information
+- **doc://example**: Sample markdown document
+- **greeting://{name}**: Personalized greeting template
+- **item://{id}**: Item data by ID
+
+## Available Prompts
+
+- **greeting**: Generates a personalized greeting
+- **code_review**: Structured code review prompt
+
+## Recommended Workflows
+
+1. **Testing Connection**: Call `hello` with your name to verify the server is responding
+2. **Weather Demo**: Call `get_weather` with a location to see structured output
+3. **Progress Demo**: Call `long_task` to see progress notifications
+4. **Dynamic Loading**: Call `load_bonus_tool`, then refresh tools to see `bonus_calculator`
+5. **Elicitation Demo**: Call `confirm_action` to see user confirmation flow
+6. **URL Elicitation**: Call `get_feedback` to open a feedback form
+
+## Tool Annotations
+
+All tools include annotations indicating:
+- Whether they modify state (readOnlyHint)
+- If they're safe to retry (idempotentHint)
+- Whether they access external systems (openWorldHint)
+
+Use these hints to make informed decisions about tool usage.";
 
 /// The main MCP server implementing all handlers.
 #[derive(Clone)]
