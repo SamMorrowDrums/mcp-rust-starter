@@ -153,7 +153,7 @@ pub struct GetFeedbackParams {
 }
 
 /// Server instructions for AI assistants.
-pub const SERVER_INSTRUCTIONS: &str = r#"# MCP Rust Starter Server
+pub const SERVER_INSTRUCTIONS: &str = r"# MCP Rust Starter Server
 
 A demonstration MCP server showcasing Rust SDK capabilities.
 
@@ -175,7 +175,7 @@ A demonstration MCP server showcasing Rust SDK capabilities.
 ## Notes
 
 - All tools include annotations (readOnlyHint, idempotentHint, openWorldHint) to guide safe usage
-- Resources and prompts are available for context and templating — use `resources/list` and `prompts/list` to discover them"#;
+- Resources and prompts are available for context and templating — use `resources/list` and `prompts/list` to discover them";
 
 /// The main MCP server implementing all handlers.
 #[derive(Clone)]
