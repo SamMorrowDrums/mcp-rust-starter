@@ -474,25 +474,17 @@ impl ServerHandler for McpServer {
     /// Prompts and resources do NOT enable `list_changed` because this server's
     /// prompt and resource lists are static — they never change after startup.
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            server_info: Implementation {
-                name: "mcp-rust-starter".into(),
-                version: "1.0.0".into(),
-                title: None,
-                description: None,
-                icons: None,
-                website_url: None,
-            },
-            capabilities: ServerCapabilities::builder()
+        ServerInfo::new(
+            ServerCapabilities::builder()
                 .enable_experimental()
                 .enable_prompts()
                 .enable_resources()
                 .enable_tools()
                 .enable_tool_list_changed()
                 .build(),
-            instructions: Some(SERVER_INSTRUCTIONS.into()),
-            ..Default::default()
-        }
+        )
+        .with_server_info(Implementation::new("mcp-rust-starter", "1.0.0"))
+        .with_instructions(SERVER_INSTRUCTIONS)
     }
 
     // -- Tool handlers --

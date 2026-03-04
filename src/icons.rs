@@ -5,11 +5,9 @@ use rmcp::model::Icon;
 
 /// Create an Icon from a data URI
 fn icon(src: &str) -> Icon {
-    Icon {
-        src: src.to_string(),
-        mime_type: Some("image/png".to_string()),
-        sizes: Some(vec!["256x256".to_string()]),
-    }
+    Icon::new(src)
+        .with_mime_type("image/png")
+        .with_sizes(vec!["256x256".to_string()])
 }
 
 /// Waving hand icon for greeting tools

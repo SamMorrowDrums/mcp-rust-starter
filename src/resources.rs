@@ -126,9 +126,10 @@ pub fn read_resource(uri: &str) -> Result<ReadResourceResult, McpError> {
         }
     };
 
-    Ok(ReadResourceResult {
-        contents: vec![ResourceContents::text(content, uri.to_string())],
-    })
+    Ok(ReadResourceResult::new(vec![ResourceContents::text(
+        content,
+        uri.to_string(),
+    )]))
 }
 
 fn about_content() -> String {
