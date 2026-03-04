@@ -153,8 +153,29 @@ pub struct GetFeedbackParams {
 }
 
 /// Server instructions for AI assistants.
-pub const SERVER_INSTRUCTIONS: &str =
-    "MCP Rust Starter - A demonstration server showcasing core MCP features";
+pub const SERVER_INSTRUCTIONS: &str = r#"# MCP Rust Starter Server
+
+A demonstration MCP server showcasing Rust SDK capabilities.
+
+## Recommended Workflows
+
+1. **Test connectivity** → Call `hello` to verify the server responds
+2. **Structured output** → Call `get_weather` to see typed response data
+3. **Progress reporting** → Call `long_task` to observe real-time progress notifications
+4. **Dynamic tools** → Call `load_bonus_tool`, then re-list tools to see `bonus_calculator` appear
+5. **LLM sampling** → Call `ask_llm` to have the server request a completion from the client
+6. **Elicitation** → Call `confirm_action` (form-based) or `get_feedback` (URL-based) to request user input
+
+## Multi-Tool Flows
+
+- **Full demo**: `hello` → `get_weather` → `long_task` → `load_bonus_tool` → `bonus_calculator`
+- **Dynamic loading**: `load_bonus_tool` triggers a `tools/list_changed` notification — refresh your tool list to see `bonus_calculator`
+- **User interaction**: `confirm_action` demonstrates schema elicitation, `get_feedback` demonstrates URL elicitation
+
+## Notes
+
+- All tools include annotations (readOnlyHint, idempotentHint, openWorldHint) to guide safe usage
+- Resources and prompts are available for context and templating — use `resources/list` and `prompts/list` to discover them"#;
 
 /// The main MCP server implementing all handlers.
 #[derive(Clone)]
