@@ -26,40 +26,29 @@ use rmcp::{
 /// is used for consistency with the MCP protocol.
 pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
     let prompts = vec![
-        Prompt {
-            name: "greet".into(),
-            title: Some("Greeting Prompt".into()),
-            description: Some("Generate a greeting message".into()),
-            arguments: Some(vec![
-                PromptArgument {
-                    name: "name".into(),
-                    title: None,
-                    description: Some("Name of the person to greet".into()),
-                    required: Some(true),
-                },
-                PromptArgument {
-                    name: "style".into(),
-                    title: None,
-                    description: Some("Greeting style (formal/casual)".into()),
-                    required: Some(false),
-                },
+        Prompt::new(
+            "greet",
+            Some("Generate a greeting message"),
+            Some(vec![
+                PromptArgument::new("name")
+                    .with_description("Name of the person to greet")
+                    .with_required(true),
+                PromptArgument::new("style")
+                    .with_description("Greeting style (formal/casual)")
+                    .with_required(false),
             ]),
-            icons: None,
-            meta: None,
-        },
-        Prompt {
-            name: "code_review".into(),
-            title: Some("Code Review".into()),
-            description: Some("Review code for potential improvements".into()),
-            arguments: Some(vec![PromptArgument {
-                name: "code".into(),
-                title: None,
-                description: Some("The code to review".into()),
-                required: Some(true),
-            }]),
-            icons: None,
-            meta: None,
-        },
+        )
+        .with_title("Greeting Prompt"),
+        Prompt::new(
+            "code_review",
+            Some("Review code for potential improvements"),
+            Some(vec![
+                PromptArgument::new("code")
+                    .with_description("The code to review")
+                    .with_required(true),
+            ]),
+        )
+        .with_title("Code Review"),
     ];
 
     Ok(ListPromptsResult {
@@ -106,13 +95,10 @@ fn greet_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpEr
         _ => format!("Write a casual, friendly hello to {name}."),
     };
 
-    Ok(GetPromptResult {
-        description: Some("Generate a personalized greeting".into()),
-        messages: vec![PromptMessage {
-            role: PromptMessageRole::User,
-            content: PromptMessageContent::Text { text },
-        }],
-    })
+    Ok(GetPromptResult::new(vec![
+        PromptMessage::new(PromptMessageRole::User, PromptMessageContent::text(text)),
+    ])
+    .with_description("Generate a personalized greeting"))
 }
 
 fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpError> {
@@ -123,11 +109,8 @@ fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult,
     let text =
         format!("Please review the following code and provide feedback:\n\n```\n{code}\n```");
 
-    Ok(GetPromptResult {
-        description: Some("Code review request".into()),
-        messages: vec![PromptMessage {
-            role: PromptMessageRole::User,
-            content: PromptMessageContent::Text { text },
-        }],
-    })
+    Ok(GetPromptResult::new(vec![
+        PromptMessage::new(PromptMessageRole::User, PromptMessageContent::text(text)),
+    ])
+    .with_description("Code review request"))
 }
