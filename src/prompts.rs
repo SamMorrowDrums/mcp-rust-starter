@@ -6,7 +6,7 @@
 //!
 //! This module demonstrates two prompt templates:
 //! - **greet** – generates a personalised greeting in different styles
-//! - **code_review** – creates a structured code review request
+//! - `code_review` – creates a structured code review request
 
 use std::collections::HashMap;
 

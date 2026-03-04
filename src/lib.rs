@@ -232,7 +232,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(message)]))
     }
 
-    /// **get_weather** – Structured output with `output_schema`.
+    /// `get_weather` – Structured output with `output_schema`.
     /// Demonstrates returning typed JSON data (the `Weather` struct) so that
     /// clients can validate the response shape at runtime.
     #[tool(
@@ -270,7 +270,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// **long_task** – Progress reporting via notifications.
+    /// `long_task` – Progress reporting via notifications.
     /// Shows how a tool can report incremental progress to the client.
     /// In a full implementation, each step would send a `notifications/progress`
     /// message so the client can display a progress bar.
@@ -311,7 +311,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(result)]))
     }
 
-    /// **load_bonus_tool** – Dynamic tool registration (`listChanged` notification).
+    /// `load_bonus_tool` – Dynamic tool registration (`listChanged` notification).
     /// Demonstrates adding tools at runtime. When called, the server would
     /// register a new tool and send a `notifications/tools/list_changed`
     /// notification so clients refresh their tool list.
@@ -344,7 +344,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// **ask_llm** – LLM sampling capability.
+    /// `ask_llm` – LLM sampling capability.
     /// Demonstrates MCP sampling: the server asks the *client's* LLM a question.
     /// This inverts the usual flow — instead of the client calling the server,
     /// the server requests a completion from the client via `create_message()`.
@@ -378,7 +378,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// **confirm_action** – Schema elicitation.
+    /// `confirm_action` – Schema elicitation.
     /// Demonstrates MCP elicitation: the server presents a structured form
     /// (JSON Schema) to the user and collects their input. Useful for
     /// confirmation dialogs, settings forms, or multi-field input.
@@ -416,7 +416,7 @@ impl McpServer {
         Ok(CallToolResult::success(vec![Content::text(json_str)]))
     }
 
-    /// **get_feedback** – URL elicitation.
+    /// `get_feedback` – URL elicitation.
     /// Demonstrates MCP elicitation via URL: the server asks the client to
     /// open a URL (e.g. a feedback form) and waits for the result.
     /// Note `open_world_hint = true` because it directs the user to an external URL.
