@@ -42,11 +42,9 @@ pub fn list_prompts() -> Result<ListPromptsResult, McpError> {
         Prompt::new(
             "code_review",
             Some("Review code for potential improvements"),
-            Some(vec![
-                PromptArgument::new("code")
-                    .with_description("The code to review")
-                    .with_required(true),
-            ]),
+            Some(vec![PromptArgument::new("code")
+                .with_description("The code to review")
+                .with_required(true)]),
         )
         .with_title("Code Review"),
     ];
@@ -95,9 +93,10 @@ fn greet_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpEr
         _ => format!("Write a casual, friendly hello to {name}."),
     };
 
-    Ok(GetPromptResult::new(vec![
-        PromptMessage::new(PromptMessageRole::User, PromptMessageContent::text(text)),
-    ])
+    Ok(GetPromptResult::new(vec![PromptMessage::new(
+        PromptMessageRole::User,
+        PromptMessageContent::text(text),
+    )])
     .with_description("Generate a personalized greeting"))
 }
 
@@ -109,8 +108,9 @@ fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult,
     let text =
         format!("Please review the following code and provide feedback:\n\n```\n{code}\n```");
 
-    Ok(GetPromptResult::new(vec![
-        PromptMessage::new(PromptMessageRole::User, PromptMessageContent::text(text)),
-    ])
+    Ok(GetPromptResult::new(vec![PromptMessage::new(
+        PromptMessageRole::User,
+        PromptMessageContent::text(text),
+    )])
     .with_description("Code review request"))
 }
