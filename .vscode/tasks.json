@@ -73,6 +73,15 @@
       "problemMatcher": ["$rustc"]
     },
     {
+      "label": "Watch (stdio)",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["watch", "-x", "run --bin mcp-rust-starter-stdio"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$rustc"]
+    },
+    {
       "label": "Clean",
       "type": "shell",
       "command": "cargo",
