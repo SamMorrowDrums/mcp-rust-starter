@@ -214,6 +214,7 @@ impl McpServer {
     #[tool(
         name = "hello",
         description = "Say hello to a person",
+        input_schema = schema_for_type::<HelloParams>(),
         output_schema = schema_for_type::<HelloResponse>(),
         annotations(
             title = "Say Hello",
@@ -238,6 +239,7 @@ impl McpServer {
     #[tool(
         name = "get_weather",
         description = "Get the current weather for a city",
+        input_schema = schema_for_type::<GetWeatherParams>(),
         output_schema = schema_for_type::<Weather>(),
         annotations(
             title = "Get Weather",
@@ -277,6 +279,7 @@ impl McpServer {
     #[tool(
         name = "long_task",
         description = "Simulate a long-running task with progress updates",
+        input_schema = schema_for_type::<LongTaskParams>(),
         output_schema = schema_for_type::<LongTaskResponse>(),
         annotations(
             title = "Long Running Task",
@@ -351,6 +354,7 @@ impl McpServer {
     #[tool(
         name = "ask_llm",
         description = "Ask the connected LLM a question using sampling",
+        input_schema = schema_for_type::<AskLlmParams>(),
         output_schema = schema_for_type::<AskLlmResponse>(),
         annotations(
             title = "Ask LLM",
@@ -385,6 +389,7 @@ impl McpServer {
     #[tool(
         name = "confirm_action",
         description = "Request user confirmation before proceeding",
+        input_schema = schema_for_type::<ConfirmActionParams>(),
         output_schema = schema_for_type::<ConfirmActionResponse>(),
         annotations(
             title = "Confirm Action",
@@ -423,6 +428,7 @@ impl McpServer {
     #[tool(
         name = "get_feedback",
         description = "Request feedback from the user",
+        input_schema = schema_for_type::<GetFeedbackParams>(),
         output_schema = schema_for_type::<GetFeedbackResponse>(),
         annotations(
             title = "Get Feedback",
@@ -574,6 +580,48 @@ impl ServerHandler for McpServer {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tool_input_schemas_preserve_titles_and_descriptions() {
+        let tools = McpServer::new().tool_router.list_all();
+        for (name, title, description) in [
+            (
+                "hello",
+                "helloArguments",
+                "Parameters for the `hello` tool.",
+            ),
+            (
+                "get_weather",
+                "get_weatherArguments",
+                "Parameters for the `get_weather` tool.",
+            ),
+            (
+                "long_task",
+                "long_taskArguments",
+                "Parameters for the `long_task` tool.",
+            ),
+            (
+                "ask_llm",
+                "ask_llmArguments",
+                "Parameters for the `ask_llm` tool.",
+            ),
+            (
+                "confirm_action",
+                "confirm_actionArguments",
+                "Parameters for the `confirm_action` tool.",
+            ),
+            (
+                "get_feedback",
+                "get_feedbackArguments",
+                "Parameters for the `get_feedback` tool.",
+            ),
+        ] {
+            let tool = tools.iter().find(|tool| tool.name == name).unwrap();
+            assert_eq!(tool.input_schema["title"], title);
+            assert_eq!(tool.input_schema["description"], description);
+            assert_eq!(tool.input_schema["type"], "object");
+        }
+    }
 
     #[tokio::test]
     async fn hello_preserves_text_content() {
