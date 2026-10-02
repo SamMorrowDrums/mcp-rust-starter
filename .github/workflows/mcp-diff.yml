@@ -15,11 +15,11 @@ jobs:
   mcp-diff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: SamMorrowDrums/mcp-server-diff@v2
+      - uses: SamMorrowDrums/mcp-server-diff@v3
         with:
           setup_rust: true
           install_command: cargo fetch

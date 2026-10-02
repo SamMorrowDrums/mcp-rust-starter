@@ -10,8 +10,8 @@
 
 use rmcp::{
     model::{
-        ListResourceTemplatesResult, ListResourcesResult, RawResource, RawResourceTemplate,
-        ReadResourceResult, Resource, ResourceContents, ResourceTemplate,
+        ListResourceTemplatesResult, ListResourcesResult, ReadResourceResult, Resource,
+        ResourceContents, ResourceTemplate,
     },
     ErrorData as McpError,
 };
@@ -24,32 +24,14 @@ use rmcp::{
 /// is used for consistency with the MCP protocol.
 pub fn list_resources() -> Result<ListResourcesResult, McpError> {
     let resources = vec![
-        Resource::new(
-            RawResource {
-                uri: "about://server".into(),
-                name: "About".into(),
-                title: Some("About This Server".into()),
-                description: Some("Information about this MCP server".into()),
-                mime_type: Some("text/plain".into()),
-                size: None,
-                icons: None,
-                meta: None,
-            },
-            None,
-        ),
-        Resource::new(
-            RawResource {
-                uri: "doc://example".into(),
-                name: "Example Document".into(),
-                title: Some("Example Document".into()),
-                description: Some("An example document resource".into()),
-                mime_type: Some("text/plain".into()),
-                size: None,
-                icons: None,
-                meta: None,
-            },
-            None,
-        ),
+        Resource::new("about://server", "About")
+            .with_title("About This Server")
+            .with_description("Information about this MCP server")
+            .with_mime_type("text/plain"),
+        Resource::new("doc://example", "Example Document")
+            .with_title("Example Document")
+            .with_description("An example document resource")
+            .with_mime_type("text/plain"),
     ];
 
     Ok(ListResourcesResult {
@@ -67,28 +49,14 @@ pub fn list_resources() -> Result<ListResourcesResult, McpError> {
 /// is used for consistency with the MCP protocol.
 pub fn list_resource_templates() -> Result<ListResourceTemplatesResult, McpError> {
     let templates = vec![
-        ResourceTemplate::new(
-            RawResourceTemplate {
-                uri_template: "greeting://{name}".into(),
-                name: "Personalized Greeting".into(),
-                title: Some("Personalized Greeting".into()),
-                description: Some("A personalized greeting for a specific person".into()),
-                mime_type: Some("text/plain".into()),
-                icons: None,
-            },
-            None,
-        ),
-        ResourceTemplate::new(
-            RawResourceTemplate {
-                uri_template: "item://{id}".into(),
-                name: "Item Data".into(),
-                title: Some("Item Data".into()),
-                description: Some("Data for a specific item by ID".into()),
-                mime_type: Some("application/json".into()),
-                icons: None,
-            },
-            None,
-        ),
+        ResourceTemplate::new("greeting://{name}", "Personalized Greeting")
+            .with_title("Personalized Greeting")
+            .with_description("A personalized greeting for a specific person")
+            .with_mime_type("text/plain"),
+        ResourceTemplate::new("item://{id}", "Item Data")
+            .with_title("Item Data")
+            .with_description("Data for a specific item by ID")
+            .with_mime_type("application/json"),
     ];
 
     Ok(ListResourceTemplatesResult {

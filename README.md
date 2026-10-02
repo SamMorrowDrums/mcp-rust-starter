@@ -1,7 +1,7 @@
 # MCP Rust Starter
 
 [![CI](https://github.com/SamMorrowDrums/mcp-rust-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/SamMorrowDrums/mcp-rust-starter/actions/workflows/ci.yml)
-[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![Clippy](https://img.shields.io/badge/Clippy-pedantic-green?logo=rust&logoColor=white)](https://rust-lang.github.io/rust-clippy/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple)](https://modelcontextprotocol.io/)
@@ -35,7 +35,7 @@ A feature-complete Model Context Protocol (MCP) server template in Rust. This st
 
 ### Prerequisites
 
-- [Rust 1.75+](https://www.rust-lang.org/tools/install) (2021 edition)
+- [Current stable Rust](https://www.rust-lang.org/tools/install) (2021 edition; selected by `rust-toolchain.toml`)
 - [Cargo](https://doc.rust-lang.org/cargo/) (included with Rust)
 - (Optional) [cargo-watch](https://crates.io/crates/cargo-watch) for live reload
 
@@ -67,6 +67,11 @@ cargo run --bin mcp-rust-starter-http
 PORT=8080 cargo run --bin mcp-rust-starter-http
 # Server runs on http://localhost:3000 by default
 ```
+
+The patched SDK rejects HTTP `Host` headers outside its default loopback
+allowlist. For a public deployment, configure `StreamableHttpServerConfig` in
+`src/bin/http.rs` with `.with_allowed_hosts(["your-server.example.com"])` for
+the exact hostnames you serve. Do not disable host validation.
 
 ## 🔧 VS Code Integration
 
@@ -147,6 +152,22 @@ cargo install cargo-watch
 cargo watch -x 'run --bin mcp-rust-starter-stdio'
 ```
 Changes to any source file will automatically rebuild and restart the server.
+
+### Dependency maintenance
+
+Dependabot checks Cargo dependencies and GitHub Actions weekly. Commit `Cargo.lock`
+alongside dependency changes so both transports use the audited dependency graph.
+To check it against RustSec advisories, including unsoundness warnings:
+
+```bash
+cargo install cargo-audit --locked
+cargo audit --deny warnings
+```
+
+The server uses the patched rmcp 2.x SDK. Upgrading to rmcp 3.x is deferred until
+its new MCP protocol lifecycle can be migrated without changing client compatibility.
+The optional remote endpoint workflow uses `mcp-server-diff` to probe a configured
+server; it is not a full protocol conformance suite.
 
 ## 🔍 MCP Inspector
 
