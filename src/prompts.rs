@@ -12,8 +12,8 @@ use std::collections::HashMap;
 
 use rmcp::{
     model::{
-        GetPromptResult, ListPromptsResult, Prompt, PromptArgument, PromptMessage,
-        PromptMessageContent, PromptMessageRole,
+        ContentBlock, GetPromptResult, ListPromptsResult, Prompt, PromptArgument, PromptMessage,
+        Role,
     },
     ErrorData as McpError,
 };
@@ -94,8 +94,8 @@ fn greet_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult, McpEr
     };
 
     Ok(GetPromptResult::new(vec![PromptMessage::new(
-        PromptMessageRole::User,
-        PromptMessageContent::text(text),
+        Role::User,
+        ContentBlock::text(text),
     )])
     .with_description("Generate a personalized greeting"))
 }
@@ -109,8 +109,8 @@ fn code_review_prompt(args: &HashMap<String, String>) -> Result<GetPromptResult,
         format!("Please review the following code and provide feedback:\n\n```\n{code}\n```");
 
     Ok(GetPromptResult::new(vec![PromptMessage::new(
-        PromptMessageRole::User,
-        PromptMessageContent::text(text),
+        Role::User,
+        ContentBlock::text(text),
     )])
     .with_description("Code review request"))
 }

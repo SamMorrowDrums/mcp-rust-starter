@@ -1,16 +1,16 @@
-# Remote Conformance Test
+# Remote MCP Endpoint Test
 #
 # This workflow tests against a deployed MCP server endpoint.
 # 
 # To use this workflow:
 # 1. Deploy your MCP server to a hosting service
-# 2. Add the following repository secrets:
+# 2. Add the following repository variable:
 #    - MCP_REMOTE_URL: Your deployed server's MCP endpoint (e.g., https://my-mcp-server.example.com/mcp)
-# 3. Uncomment the workflow below
+# The endpoint is probed using the maintained mcp-server-diff action.
 #
 # Example: Testing a server deployed to Railway, Fly.io, etc.
 
-name: Remote Conformance Test
+name: Remote MCP Endpoint Test
 
 on:
   # Run on schedule to catch environment drift
@@ -36,16 +36,19 @@ jobs:
   remote-conformance:
     # Only run if remote URL is configured
     if: vars.MCP_REMOTE_URL != '' || github.event.inputs.server_url != ''
-    uses: SamMorrowDrums/mcp-conformance-action/.github/workflows/conformance.yml@v2.3.5
-    with:
-      # No build needed for remote testing
-      install_command: "echo 'Testing remote server'"
-      
-      configurations: |
-        [
-          {
-            "name": "remote-production",
-            "transport": "http",
-            "server_url": "${{ github.event.inputs.server_url || vars.MCP_REMOTE_URL }}"
-          }
-        ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: SamMorrowDrums/mcp-server-diff@v3
+        with:
+          configurations: |
+            [
+              {
+                "name": "remote-production",
+                "transport": "streamable-http",
+                "server_url": "${{ github.event.inputs.server_url || vars.MCP_REMOTE_URL }}"
+              }
+            ]

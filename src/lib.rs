@@ -24,7 +24,7 @@ use std::collections::HashMap;
 use rmcp::{
     handler::server::{tool::schema_for_type, tool::ToolRouter, wrapper::Parameters},
     model::{
-        CallToolResult, Content, GetPromptResult, Implementation, ListPromptsResult,
+        CallToolResult, ContentBlock, GetPromptResult, Implementation, ListPromptsResult,
         ListResourcesResult, ReadResourceResult, ServerCapabilities, ServerInfo,
     },
     service::RequestContext,
@@ -229,7 +229,7 @@ impl McpServer {
             "Hello, {}! Welcome to the MCP Rust Starter Server.",
             params.0.name
         );
-        Ok(CallToolResult::success(vec![Content::text(message)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(message)]))
     }
 
     /// `get_weather` – Structured output with `output_schema`.
@@ -252,7 +252,7 @@ impl McpServer {
         &self,
         params: Parameters<GetWeatherParams>,
     ) -> Result<CallToolResult, McpError> {
-        use rand::Rng;
+        use rand::RngExt;
         let mut rng = rand::rng();
         let conditions = ["sunny", "cloudy", "rainy", "windy"];
 
@@ -267,7 +267,7 @@ impl McpServer {
         let json_str = serde_json::to_string_pretty(&weather)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(json_str)]))
     }
 
     /// `long_task` – Progress reporting via notifications.
@@ -308,7 +308,7 @@ impl McpServer {
 
         write!(&mut result, "Task '{task_name}' completed successfully!").unwrap();
 
-        Ok(CallToolResult::success(vec![Content::text(result)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(result)]))
     }
 
     /// `load_bonus_tool` – Dynamic tool registration (`listChanged` notification).
@@ -341,7 +341,7 @@ impl McpServer {
         let json_str = serde_json::to_string_pretty(&result)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(json_str)]))
     }
 
     /// `ask_llm` – LLM sampling capability.
@@ -375,7 +375,7 @@ impl McpServer {
         let json_str = serde_json::to_string_pretty(&result)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(json_str)]))
     }
 
     /// `confirm_action` – Schema elicitation.
@@ -413,7 +413,7 @@ impl McpServer {
         let json_str = serde_json::to_string_pretty(&result)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(json_str)]))
     }
 
     /// `get_feedback` – URL elicitation.
@@ -450,7 +450,7 @@ impl McpServer {
         let json_str = serde_json::to_string_pretty(&result)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        Ok(CallToolResult::success(vec![Content::text(json_str)]))
+        Ok(CallToolResult::success(vec![ContentBlock::text(json_str)]))
     }
 }
 
@@ -490,16 +490,17 @@ impl ServerHandler for McpServer {
     // -- Tool handlers --
 
     /// Lists all tools registered with this server (via the `#[tool_router]` macro).
-    async fn list_tools(
+    fn list_tools(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
-    ) -> Result<rmcp::model::ListToolsResult, McpError> {
-        Ok(rmcp::model::ListToolsResult {
+    ) -> impl std::future::Future<Output = Result<rmcp::model::ListToolsResult, McpError>> + Send
+    {
+        std::future::ready(Ok(rmcp::model::ListToolsResult {
             tools: self.tool_router.list_all(),
             next_cursor: None,
             meta: None,
-        })
+        }))
     }
 
     /// Dispatches a `tools/call` request to the matching tool implementation.
@@ -516,55 +517,102 @@ impl ServerHandler for McpServer {
     // -- Resource handlers (read-only data exposed to clients) --
 
     /// Lists static resources available on this server.
-    async fn list_resources(
+    fn list_resources(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
-    ) -> Result<ListResourcesResult, McpError> {
-        resources::list_resources()
+    ) -> impl std::future::Future<Output = Result<ListResourcesResult, McpError>> + Send {
+        std::future::ready(resources::list_resources())
     }
 
     /// Lists resource templates (parameterised URI patterns like `greeting://{name}`).
-    async fn list_resource_templates(
+    fn list_resource_templates(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
-    ) -> Result<rmcp::model::ListResourceTemplatesResult, McpError> {
-        resources::list_resource_templates()
+    ) -> impl std::future::Future<Output = Result<rmcp::model::ListResourceTemplatesResult, McpError>>
+           + Send {
+        std::future::ready(resources::list_resource_templates())
     }
 
     /// Reads a resource by URI, returning its content.
-    async fn read_resource(
+    fn read_resource(
         &self,
         request: rmcp::model::ReadResourceRequestParams,
         _context: RequestContext<RoleServer>,
-    ) -> Result<ReadResourceResult, McpError> {
-        resources::read_resource(&request.uri)
+    ) -> impl std::future::Future<Output = Result<ReadResourceResult, McpError>> + Send {
+        std::future::ready(resources::read_resource(&request.uri))
     }
 
     // -- Prompt handlers (reusable message templates) --
 
     /// Lists all prompt templates this server offers.
-    async fn list_prompts(
+    fn list_prompts(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
-    ) -> Result<ListPromptsResult, McpError> {
-        prompts::list_prompts()
+    ) -> impl std::future::Future<Output = Result<ListPromptsResult, McpError>> + Send {
+        std::future::ready(prompts::list_prompts())
     }
 
     /// Retrieves a prompt by name, filling in the supplied arguments.
-    async fn get_prompt(
+    fn get_prompt(
         &self,
         request: rmcp::model::GetPromptRequestParams,
         _context: RequestContext<RoleServer>,
-    ) -> Result<GetPromptResult, McpError> {
+    ) -> impl std::future::Future<Output = Result<GetPromptResult, McpError>> + Send {
         // Convert serde_json::Map to HashMap<String, String>
         let arguments = request.arguments.map(|map| {
             map.into_iter()
                 .filter_map(|(k, v)| v.as_str().map(|s| (k, s.to_string())))
                 .collect::<HashMap<String, String>>()
         });
-        prompts::get_prompt(&request.name, arguments)
+        std::future::ready(prompts::get_prompt(&request.name, arguments))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn hello_preserves_text_content() {
+        let result = McpServer::new()
+            .hello(Parameters(HelloParams {
+                name: "Alice".to_string(),
+            }))
+            .await
+            .unwrap();
+
+        let value = serde_json::to_value(result).unwrap();
+        assert_eq!(
+            value["content"],
+            serde_json::json!([{
+                "type": "text",
+                "text": "Hello, Alice! Welcome to the MCP Rust Starter Server."
+            }])
+        );
+    }
+
+    #[tokio::test]
+    async fn weather_preserves_ranges_and_response_shape() {
+        let server = McpServer::new();
+        for _ in 0..100 {
+            let result = server
+                .get_weather(Parameters(GetWeatherParams {
+                    city: "London".to_string(),
+                }))
+                .await
+                .unwrap();
+            let value = serde_json::to_value(result).unwrap();
+            assert_eq!(value["content"][0]["type"], "text");
+            let weather: Weather =
+                serde_json::from_str(value["content"][0]["text"].as_str().unwrap()).unwrap();
+            assert_eq!(weather.location, "London");
+            assert_eq!(weather.unit, "celsius");
+            assert!((15..35).contains(&weather.temperature));
+            assert!((40..80).contains(&weather.humidity));
+            assert!(["sunny", "cloudy", "rainy", "windy"].contains(&weather.conditions.as_str()));
+        }
     }
 }
