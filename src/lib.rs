@@ -19,13 +19,15 @@ pub mod prompts;
 pub mod resources;
 pub mod tools;
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 use rmcp::{
     handler::server::{tool::schema_for_type, tool::ToolRouter, wrapper::Parameters},
     model::{
-        CallToolResult, ContentBlock, GetPromptResult, Implementation, ListPromptsResult,
-        ListResourcesResult, ReadResourceResult, ServerCapabilities, ServerInfo,
+        CallToolResponse, CallToolResult, ContentBlock, GetPromptResponse, Implementation,
+        ListPromptsResult, ListResourcesResult, ProtocolVersion, ReadResourceResponse,
+        ServerCapabilities, ServerConfig,
     },
     service::RequestContext,
     tool, tool_router, ErrorData as McpError, RoleServer, ServerHandler,
@@ -479,8 +481,8 @@ impl ServerHandler for McpServer {
     ///
     /// Prompts and resources do NOT enable `list_changed` because this server's
     /// prompt and resource lists are static — they never change after startup.
-    fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(
+    fn get_info(&self) -> ServerConfig {
+        ServerConfig::new(
             ServerCapabilities::builder()
                 .enable_experimental()
                 .enable_prompts()
@@ -489,8 +491,13 @@ impl ServerHandler for McpServer {
                 .enable_tool_list_changed()
                 .build(),
         )
+        .with_protocol_version(ProtocolVersion::V_2025_11_25)
         .with_server_info(Implementation::new("mcp-rust-starter", "1.0.0"))
         .with_instructions(SERVER_INSTRUCTIONS)
+    }
+
+    fn supported_protocol_versions(&self) -> Cow<'static, [ProtocolVersion]> {
+        Cow::Owned(vec![ProtocolVersion::V_2025_11_25])
     }
 
     // -- Tool handlers --
@@ -504,7 +511,10 @@ impl ServerHandler for McpServer {
     {
         std::future::ready(Ok(rmcp::model::ListToolsResult {
             tools: self.tool_router.list_all(),
+            result_type: None,
             next_cursor: None,
+            ttl_ms: None,
+            cache_scope: None,
             meta: None,
         }))
     }
@@ -514,7 +524,7 @@ impl ServerHandler for McpServer {
         &self,
         request: rmcp::model::CallToolRequestParams,
         context: RequestContext<RoleServer>,
-    ) -> Result<CallToolResult, McpError> {
+    ) -> Result<CallToolResponse, McpError> {
         let tool_context =
             rmcp::handler::server::tool::ToolCallContext::new(self, request, context);
         self.tool_router.call(tool_context).await
@@ -546,8 +556,8 @@ impl ServerHandler for McpServer {
         &self,
         request: rmcp::model::ReadResourceRequestParams,
         _context: RequestContext<RoleServer>,
-    ) -> impl std::future::Future<Output = Result<ReadResourceResult, McpError>> + Send {
-        std::future::ready(resources::read_resource(&request.uri))
+    ) -> impl std::future::Future<Output = Result<ReadResourceResponse, McpError>> + Send {
+        std::future::ready(resources::read_resource(&request.uri).map(Into::into))
     }
 
     // -- Prompt handlers (reusable message templates) --
@@ -566,14 +576,14 @@ impl ServerHandler for McpServer {
         &self,
         request: rmcp::model::GetPromptRequestParams,
         _context: RequestContext<RoleServer>,
-    ) -> impl std::future::Future<Output = Result<GetPromptResult, McpError>> + Send {
+    ) -> impl std::future::Future<Output = Result<GetPromptResponse, McpError>> + Send {
         // Convert serde_json::Map to HashMap<String, String>
         let arguments = request.arguments.map(|map| {
             map.into_iter()
                 .filter_map(|(k, v)| v.as_str().map(|s| (k, s.to_string())))
                 .collect::<HashMap<String, String>>()
         });
-        std::future::ready(prompts::get_prompt(&request.name, arguments))
+        std::future::ready(prompts::get_prompt(&request.name, arguments).map(Into::into))
     }
 }
 
