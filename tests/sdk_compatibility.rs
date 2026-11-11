@@ -81,6 +81,6 @@ fn server_keeps_legacy_protocol_and_capabilities() {
     assert_eq!(info["protocolVersion"], "2025-11-25");
     assert_eq!(info["serverInfo"]["name"], "mcp-rust-starter");
     assert_eq!(info["capabilities"]["tools"]["listChanged"], true);
-    assert!(info["capabilities"]["resources"].is_object());
-    assert!(info["capabilities"]["prompts"].is_object());
+    assert_eq!(info["capabilities"]["resources"], json!({}));
+    assert_eq!(info["capabilities"]["prompts"], json!({}));
 }
