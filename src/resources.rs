@@ -35,8 +35,11 @@ pub fn list_resources() -> Result<ListResourcesResult, McpError> {
     ];
 
     Ok(ListResourcesResult {
+        result_type: None,
         resources,
         next_cursor: None,
+        ttl_ms: None,
+        cache_scope: None,
         meta: None,
     })
 }
@@ -60,8 +63,11 @@ pub fn list_resource_templates() -> Result<ListResourceTemplatesResult, McpError
     ];
 
     Ok(ListResourceTemplatesResult {
+        result_type: None,
         resource_templates: templates,
         next_cursor: None,
+        ttl_ms: None,
+        cache_scope: None,
         meta: None,
     })
 }
